@@ -55,7 +55,6 @@
         <br>
         <input class="easyui-textbox" data-options="multiline:true,editable:false" style="width: 80%;height: 120px;"
                id="params">
-        <a href="javascript:void(0)" class="easyui-linkbutton" style="width: 80px" onclick="copyParams()">复制</a>
     </div>
 </div>
 <script type="text/javascript">
@@ -323,16 +322,6 @@
     function copyMethod() {
         let aux = document.createElement("input");
         aux.setAttribute("value", methodcode);
-        document.body.appendChild(aux);
-        aux.select();
-        document.execCommand("copy");
-        document.body.removeChild(aux);
-        $.messager.alert("提示", "复制成功");
-    }
-
-    function copyParams() {
-        let aux = document.createElement("input");
-        aux.setAttribute("value", paramscode);
         document.body.appendChild(aux);
         aux.select();
         document.execCommand("copy");
