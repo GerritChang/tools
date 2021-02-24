@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="top.gerritchang.tools.mybatis.GenerateSQLMapper">
+<!--    <select id="showAllMySQLTable" resultType="map">-->
+<!--        show tables-->
+<!--    </select>-->
+
+<!--    <select id="getMySQLTableColumns" resultType="map" parameterType="map">-->
+<!--        select column_name,column_comment,data_type,column_key-->
+<!--        from information_schema.columns-->
+<!--        where table_name=#{table_name} and table_schema=#{table_schema}-->
+<!--    </select>-->
+
+<!--    <select id="showAllOracleSchemas" resultType="map">-->
+<!--        select distinct owner ID,owner TEXT from ALL_COL_COMMENTS-->
+<!--    </select>-->
+
+<!--    <select id="showAllOracleTable" resultType="map" parameterType="string">-->
+<!--        select table_name Tables from all_tables where owner=#{schema}-->
+<!--    </select>-->
+
+<!--    <select id="getOracleTableColumns" resultType="map" parameterType="map">-->
+<!--        select A.COLUMN_NAME-->
+<!--        from ALL_COL_COMMENTS A where A.OWNER = #{table_schema} and A.table_name=#{table_name}-->
+<!--    </select>-->
+</mapper>

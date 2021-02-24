@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="jquery.min.js" type="text/javascript"></script>
+    <script src="jquery.easyui.min.js" type="text/javascript"></script>
+    <script src="public/public.js" type="text/javascript"></script>
+    <link rel="stylesheet" type="text/css" href="themes/bootstrap/easyui.css">
+    <link rel="stylesheet" type="text/css" href="bootstrap/css/bootstrap-btn.css">
+    <link rel="stylesheet" type="text/css" href="style/ownStyle.css">
+    <style>
+        iframe {
+            border-width: 0px;
+        }
+    </style>
+</head>
+<body>
+<div id="layoutDefault" class="easyui-layout" style="width:100%;height:900px;">
+    <div data-options="region:'west',split:true" title="设计窗口" style="width:300px;">
+        <form style="width: 100%;padding:10px 10px 10px 10px">
+            <label>设置行数</label>
+            <input class="easyui-numberbox" id="row_number" data-options="precision:0,min:1,max:20">
+            <br>
+            <label>设置列数</label>
+            <input class="easyui-numberbox" id="column_number" data-options="precision:0,min:1,max:12">
+            <a href="javascript:;" class="easyui-linkbutton" onclick="confirm_table()">确定</a>
+        </form>
+        <form id="drag" style="padding: 10px 10px 10px 10px">
+            <label>非easyui插件</label>
+            <table style="width: 100%;height: auto;border-color: #d9d9d9" border="1" cellpadding="0" cellspacing="0">
+                <tbody>
+                <tr style="height: 40px">
+                    <td style="text-align: center;" colspan="2">
+                        <a href="javascript:void(0);" class="btn btn-primary;font-size: 18px"
+                           onclick="resizeCom(this.innerText)">label</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </form>
+        <form id="draggable" style="padding: 10px 10px 10px 10px">
+            <label>easyui插件</label>
+            <table style="width: 100%;height: auto;border-color: #d9d9d9" border="1" cellpadding="0" cellspacing="0">
+                <tbody>
+                <tr style="height: 40px">
+                    <td style="text-align: center;">
+                        <a href="javascript:void(0);" class="btn btn-primary;font-size: 18px"
+                           onclick="resizeCom(this.innerText)">textbox</a>
+                    </td>
+                    <td style="text-align: center;">
+                        <a href="javascript:void(0);" class="btn btn-primary;font-size: 18px"
+                           onclick="resizeCom(this.innerText)">numberbox</a>
+                    </td>
+                </tr>
+                <tr style="height: 40px">
+                    <td style="text-align: center;">
+                        <a href="javascript:void(0);" class="btn btn-primary;font-size: 18px"
+                           onclick="resizeCom(this.innerText)">combobox</a>
+                    </td>
+                    <td style="text-align: center;">
+                        <a href="javascript:void(0);" class="btn btn-primary;font-size: 18px"
+                           onclick="resizeCom(this.innerText)">datebox</a>
+                    </td>
+                </tr>
+                <tr style="height: 40px">
+                    <td style="text-align: center;">
+                        <a href="javascript:void(0);" class="btn btn-primary;font-size: 18px"
+                           onclick="resizeCom(this.innerText)">numberspinner</a>
+                    </td>
+                    <td style="text-align: center;">
+                        <a href="javascript:void(0);" class="btn btn-primary;font-size: 18px"
+                           onclick="resizeCom(this.innerText)">switchbutton</a>
+                    </td>
+                </tr>
+                <tr style="height: 40px">
+                    <td style="text-align: center;">
+                        <a href="javascript:void(0);" class="btn btn-primary;font-size: 18px"
+                           onclick="resizeCom(this.innerText)">datagrid</a>
+                    </td>
+                    <td style="text-align: center;">
+                        <a href="javascript:void(0);" class="btn btn-primary;font-size: 18px"
+                           onclick="resizeCom(this.innerText)">linkbutton</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </form>
+        <form id="editDatagrid" style="padding: 10px 10px 10px 10px">
+            <a href="javascript:void(0);" class="easyui-linkbutton" onclick="addNewColumns()">添加列</a>
+            <a href="javascript:void(0);" class="easyui-linkbutton" onclick="confirmColumns()">确定</a>
+            <div id="datagridColumnsContent" style="width: 100%"></div>
+        </form>
+    </div>
+    <div data-options="region:'center',title:'预览窗口',iconCls:'icon-ok'">
+        <div id="temp" style="padding-left: 10px;padding-top: 10px;padding-right: 10px">
+            <label>预置插件窗格</label>
+            <div style="width: 100%;height: 50px;border: #000000 1px solid" id="content">
+            </div>
+        </div>
+        <div id="root" style="width: 100%;"></div>
+    </div>
+    <div data-options="region:'east',title:'设置',split:true" style="width: 300px;padding: 2px 2px 2px 2px">
+        <table id="pg" class="easyui-propertygrid" style="width:290px" data-options="
+				url:jsonUrl,
+				method:'get',
+				showGroup:true,
+				scrollbarSize:0,
+				columns: mycolumns,
+				onAfterEdit:afterPgEdit
+			">
+        </table>
+    </div>
+</div>
+<script type="text/javascript">
+
+    $(function () {
+
+        $(document).keydown(function (event) {
+            if (event.keyCode === 46) {
+                let id = window.sessionStorage.getItem("id");
+                if (id) {
+                    let div = document.getElementById(id);
+                    window.sessionStorage.removeItem(id);
+                    div.remove();
+                }
+            }
+        });
+        window.sessionStorage.clear();
+
+    });
+
+    let acceptIdArray = "";
+    let number = {};
+    number.labelNumber = 0;
+    number.textboxNumber = 0;
+    number.numberboxNumber = 0;
+    number.comboboxNumber = 0;
+    number.datagridNumber = 0;
+    number.dateboxNumber = 0;
+    number.numberspinnerNumber = 0;
+    number.switchbuttonNumber = 0;
+
+    const mycolumns = [[
+        {field: 'id', title: 'key', width: 100, halign: 'center', align: 'center', hidden: true},
+        {field: 'name', title: '属性名', width: 100, halign: 'center', align: 'center', sortable: false},
+        {field: 'value', title: '属性值', width: 100, halign: 'center', align: 'center', resizable: false}
+    ]];
+
+    const jsonUrl = 'json/propertygrid_data1.json';
+    const componentNameStr = "textbox,datebox,combobox,numberbox,numberspinner";
+
+    let propertyGridDefaultData;
+    reqData(jsonUrl).then(data => {
+        propertyGridDefaultData = data.rows;
+    });
+
+    function confirm_table() {
+        let row_number = $("#row_number").numberbox("getValue");
+        let column_number = $("#column_number").numberbox("getValue");
+        let table = document.createElement("table");
+        table.style.width = "100%";
+        table.setAttribute("border", "1");
+        table.setAttribute("cellPadding", "0");
+        table.setAttribute("cellSpacing", "0");
+        let trHtml = "<tr>";
+        let width = 100 / column_number;
+        for (let i = 0; i < column_number; i++) {
+            trHtml += "<td class='easyui-resizable dropCorner' style='height: 40px;width:" + width + "%'></td>";
+        }
+        trHtml += "</tr>";
+        let tableHtml = "<tbody>";
+        for (let i = 0; i < row_number; i++) {
+            tableHtml += trHtml;
+        }
+        tableHtml += "</tbody>";
+        table.innerHTML = tableHtml;
+        document.getElementById("root").append(table);
+        $(".dropCorner").each(function (i, n) {
+            $(n).droppable({
+                onDragEnter: function (e, source) {
+                    $(source).draggable("options").cursor = "auto";
+                    $(this).addClass("over");
+                },
+                onDrop: function (e, source) {
+                    $(this).append(source);
+                    $(this).removeClass('over');
+                }
+            })
+        })
+    }
+
+    function resizeCom(obj) {
+        let settings = new Object();
+        if (componentNameStr.indexOf(obj) != -1) {
+            settings.height = "160";
+            settings.width = "30";
+        }
+        let div = document.createElement("div");
+        div.style.width = "160px";
+        div.style.height = "30px";
+        number[obj + "Number"] += 1;
+        let id = obj + number[obj + "Number"];
+        $("#componentId").textbox("setValue", id);
+        $("#componentName").textbox("setValue", id);
+        if (acceptIdArray) {
+            acceptIdArray += ",";
+        }
+        acceptIdArray += "#" + id;
+        div.setAttribute("id", id);
+        settings.id = id;
+        settings.name = id;
+        settings.placeholder = id;
+        setPropertyGridData(settings);
+        div.setAttribute("class", "easyui-draggable easyui-resizable");
+        div.setAttribute("data-options", `proxy:'clone',
+            revert:true,
+            cursor:'auto',onStartDrag:function(){
+            $(this).draggable('options').cursor='not-allowed';
+            $(this).draggable('proxy').addClass('dp');
+            },
+            onStopDrag:function(){
+            $(this).draggable('options').cursor='auto';
+            }`);
+        div.addEventListener("click", function () {
+            let id = window.sessionStorage.getItem("id");
+            if (id) {
+                $("#" + id).removeClass("border-g");
+            }
+            $(this).addClass("border-g");
+            window.sessionStorage.setItem("id", this.id);
+            let data = window.sessionStorage.getItem(this.id);
+            if (data) {
+                $("#pg").propertygrid("loadData", JSON.parse(data));
+            }
+        });
+        $(".dropCorner").each(function (i, n) {
+            $(n).droppable({
+                accept: acceptIdArray
+            })
+        });
+        div.style.backgroundColor = "green";
+        div.style.paddingTop = "1px";
+        div.style.paddingLeft = "3px";
+        div.innerHTML = '<div id=' + id + ' class="easyui-' + obj + '"></div>';
+        $("#content").append(div);
+        console.info(div);
+        $.parser.parse($("#content"));
+    }
+
+    function afterPgEdit(rowIndex, rowData, changes) {
+        let id = window.sessionStorage.getItem("id");
+        if (id) {
+            if (rowData.id === "length") {
+
+            } else if (rowData.id === "height") {
+
+            }
+        }
+    }
+
+    function setDefaultValue(obj) {
+        if (!obj) {
+            obj = window.sessionStorage.getItem("id");
+            if (obj) {
+
+            } else {
+                $.messager.alert("提示", "请先选中一个组件");
+            }
+        }
+    }
+
+    function confirm_Component() {
+
+    }
+
+    function setPropertyGridData(settings) {
+        for (let i = 0; i < propertyGridDefaultData.length; i++) {
+            switch (propertyGridDefaultData[i].id) {
+                case "id":
+                    propertyGridDefaultData[i].value = settings["id"];
+                    break;
+                case "name":
+                    propertyGridDefaultData[i].value = settings["name"];
+                    break;
+                case "placeholder":
+                    propertyGridDefaultData[i].value = settings["placeholder"];
+                    break;
+                case "height":
+                    propertyGridDefaultData[i].value = settings["height"];
+                    break;
+                case "length":
+                    propertyGridDefaultData[i].value = settings["width"];
+                    break;
+                default:
+                    break;
+            }
+        }
+        let data = new Object();
+        data["total"] = propertyGridDefaultData.length;
+        data["rows"] = propertyGridDefaultData;
+        window.sessionStorage.setItem(settings["id"], JSON.stringify(data));
+        $("#pg").propertygrid("loadData", data);
+    }
+
+</script>
+</body>
+</html>

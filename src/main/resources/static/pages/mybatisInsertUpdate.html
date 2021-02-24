@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Demo</title>
+    <script src="./jquery.min.js" type="text/javascript"></script>
+    <script src="./jquery.easyui.min.js" type="text/javascript"></script>
+    <link rel="stylesheet" type="text/css" href="themes/bootstrap/easyui.css">
+    <script src="public/public.js" type="text/javascript"></script>
+</head>
+<body>
+<div class="easyui-layout" style="width:100%;height:900px;">
+    <div data-options="region:'west',split:true" title="表" style="width:300px;padding-left: 2px">
+        <label>选择表空间</label>
+        <div id="schema_combo"></div>
+        <div id="table_dg" style="width: 100%"></div>
+    </div>
+    <div data-options="region:'center',title:'SQL调试窗口',iconCls:'icon-ok'">
+        <form style="width: 100%;height: auto;padding-left: 10px;padding-top: 10px;padding-right: 10px">
+            <label>请选择操作方式</label>
+            <div id="operaType"></div>
+            <label>一键生成带判断的插入和更新SQL</label>
+            <a href="javascript:;" class="easyui-linkbutton" onclick="onkey()">一键生成</a>
+            <div style="background-color: #d9d9d9;height: 1px;width: 100%;margin-top: 2px"></div>
+            <div id="selectKey" style="width: 100%"></div>
+            <label>已生成SQL</label>
+            <input class="easyui-textbox" data-options="multiline:true" style="width: 100%;height: 400px" id="copySQL">
+            <span><a href="javascript:;" class="easyui-linkbutton" style="margin: 2px 2px 2px 2px;margin-left: 45%"
+                     onclick="copySQL()">复制SQL</a></span>
+        </form>
+    </div>
+</div>
+<script type="text/javascript">
+    // commonUri = "http://localhost:8080/"
+    const operaType = [{"ID": "insert", "TEXT": "插入"}, {"ID": "update", "TEXT": "更新"}];
+    const keyType = [{"ID": "pri", "TEXT": "普通主键"}, {"ID": "uni", "TEXT": "联合主键"}];
+
+    const selectKey = `
+        <label>请选择主键类别</label>
+        <div id="keyType"></div>
+        <label>请选择主键</label>
+        <div id="chooseKey"></div>
+        <div style="background-color: #d9d9d9;height: 1px;width: 100%;margin-top: 2px"></div>
+    `;
+
+    var chooseKey = new Array();
+
+    $(function () {
+
+        var schema = new Array();
+
+        $.ajax({
+            url: '/getAllSchemas',
+            async: false,
+            type: "get",
+            success: function (data) {
+                schema = data.schema;
+            }
+        });
+
+        $("#schema_combo").combobox({
+            panelHeight: '200',
+            valueField: 'ID',
+            textField: 'TEXT',
+            prompt: '---请选择---',
+            data: schema,
+            onChange: function (newValue, oldValue) {
+                if (oldValue && newValue !== oldValue) {
+                    $("#table_dg").datagrid("reload", {
+                        schema: newValue
+                    });
+                }
+            }
+        });
+
+        $("#schema_combo").combobox("select", schema[0].ID);
+
+        $("#selectKey").html(selectKey);
+
+        $("#keyType").combobox({
+            panelHeight: 'auto',
+            valueField: 'ID',
+            textField: 'TEXT',
+            data: keyType,
+            prompt: '---请选择---',
+            onChange: function (n, o) {
+                if (n === "pri") {
+                    $("#chooseKey").combobox({
+                        multiple: false
+                    });
+                } else {
+                    $("#chooseKey").combobox({
+                        multiple: true
+                    })
+                }
+            }
+        });
+        $("#chooseKey").combobox({
+            panelHeight: 'auto',
+            valueField: 'ID',
+            textField: 'TEXT',
+            prompt: '---请选择---'
+        });
+
+        $("#operaType").combobox({
+            panelHeight: 'auto',
+            valueField: 'ID',
+            textField: 'TEXT',
+            data: operaType,
+            prompt: '---请选择---'
+        });
+
+        $("#table_dg").datagrid({
+            url: "/showAllTable",
+            method: "get",
+            fitColumns: true,
+            rownumbers: true,
+            singleSelect: true,
+            queryParams: {
+                schema: schema[0].ID
+            },
+            columns: [[
+                {
+                    field: 'ck',
+                    title: 'ck',
+                    width: 150,
+                    halign: 'center',
+                    align: 'center',
+                    checkbox: true
+                },
+                {
+                    field: 'Tables',
+                    title: '选择表',
+                    width: 150,
+                    halign: 'center',
+                    align: 'left'
+                }
+            ]],
+            onCheck: function (index, data) {
+                console.info(data);
+                $.ajax({
+                    url: "/getTableColumns",
+                    type: "get",
+                    data: {
+                        table_name: data.Tables,
+                        table_schema: $("#schema_combo").combobox("getValue")
+                    },
+                    success: function (obj) {
+                        chooseKey = obj;
+                        $("#chooseKey").combobox("loadData",obj);
+                    }
+                })
+            }
+        })
+    });
+
+    function copySQL() {
+        var content = $("#copySQL").textbox("getValue");
+        var aux = document.createElement("input");
+        aux.setAttribute("value", content);
+        document.body.appendChild(aux);
+        aux.select();
+        document.execCommand("copy");
+        document.body.removeChild(aux);
+        $.messager.alert("提示", "复制成功");
+    }
+
+    function onkey() {
+        var row = $("#table_dg").datagrid("getSelected");
+        if (row) {
+            var operaType = $("#operaType").combobox("getValue");
+            if (operaType && operaType === "insert") {
+                var keyType = $("#keyType").combobox("getValue");
+                if (keyType && keyType === "pri") {
+                    var primaryKey = $("#chooseKey").combobox("getValue");
+                    if (primaryKey) {
+                        $.ajax({
+                            url: "/generateInsertSQL",
+                            type: "get",
+                            data: {
+                                table_name: row.Tables,
+                                table_schema: $("#schema_combo").combobox("getValue"),
+                                primaryKey: primaryKey,
+                                uniKey: ""
+                            },
+                            success: function (data) {
+                                $("#copySQL").textbox("setValue", data.SQL);
+                                $.messager.alert("提示", data.message);
+                            }
+                        })
+                    } else {
+                        $.messager.alert("提示", "请选择主键");
+                    }
+                } else if (keyType && keyType === "uni") {
+                    var uniKey = $("#chooseKey").combobox("getValues");
+                    if (JSON.stringify(uniKey) != "[]") {
+                        if (uniKey.length > 1) {
+                            $.ajax({
+                                url: "/generateInsertSQL",
+                                type: "get",
+                                data: {
+                                    table_name: row.Tables,
+                                    table_schema: $("#schema_combo").combobox("getValue"),
+                                    primaryKey: "",
+                                    uniKey: JSON.stringify(uniKey)
+                                },
+                                success: function (data) {
+                                    $("#copySQL").textbox("setValue", data.SQL);
+                                    $.messager.alert("提示", data.message);
+                                }
+                            })
+                        } else {
+                            $.messager.alert("提示", "联合主键请至少选择两个字段");
+                        }
+                    } else {
+                        $.messager.alert("错误", "请选择联合主键的所有字段");
+                    }
+                } else {
+                    $.messager.alert("错误", "请选择主键类型");
+                }
+
+            } else if (operaType && operaType === "update") {
+                var keyType = $("#keyType").combobox("getValue");
+                if (keyType && keyType === "pri") {
+                    var primaryKey = $("#chooseKey").combobox("getValue");
+                    if (primaryKey) {
+                        $.ajax({
+                            url: "/generateUpdateSQL",
+                            type: "get",
+                            data: {
+                                table_name: row.Tables,
+                                table_schema:$("#schema_combo").combobox("getValue"),
+                                primaryKey: primaryKey,
+                                uniKey: ""
+                            },
+                            success: function (obj) {
+                                $("#copySQL").textbox("setValue", obj.SQL);
+                                $.messager.alert("提示", data.message);
+                            }
+                        })
+                    } else {
+                        $.messager.alert("提示", "请选择主键");
+                    }
+                } else if (keyType && keyType === "uni") {
+                    var uniKey = $("#chooseKey").combobox("getValues");
+                    if (JSON.stringify(uniKey) != "[]") {
+                        if (uniKey.length > 1) {
+                            $.ajax({
+                                url: "/generateUpdateSQL",
+                                type: "get",
+                                data: {
+                                    table_name: row.Tables,
+                                    table_schema:$("#schema_combo").combobox("getValue"),
+                                    primaryKey: "",
+                                    uniKey: JSON.stringify(uniKey)
+                                },
+                                success: function (obj) {
+                                    $("#copySQL").textbox("setValue", obj.SQL);
+                                    $.messager.alert("提示", obj.message);
+                                }
+                            })
+                        } else {
+                            $.messager.alert("提示", "联合主键请至少选择两个字段");
+                        }
+                    } else {
+                        $.messager.alert("错误", "请选择联合主键的所有字段");
+                    }
+                } else {
+                    $.messager.alert("错误", "请选择主键类型");
+                }
+            } else {
+                $.messager.alert("错误", "请先选择一个操作方式");
+            }
+        } else {
+            $.messager.alert("错误", "请选择要生成SQL的表");
+        }
+    }
+</script>
+</body>
+</html>

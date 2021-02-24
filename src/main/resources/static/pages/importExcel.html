@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Demo</title>
+    <script src="./jquery.min.js" type="text/javascript"></script>
+    <script src="./jquery.easyui.min.js" type="text/javascript"></script>
+    <link rel="stylesheet" type="text/css" href="themes/bootstrap/easyui.css">
+    <script src="public/public.js" type="text/javascript"></script>
+    <script src="public/core.js" type="text/javascript"></script>
+</head>
+<body>
+<div class="easyui-layout" style="width:100%;height:900px;">
+    <div data-options="region:'west',split:true" title="表" style="width:300px;padding-left: 2px">
+        <label>选择表空间</label>
+        <div id="schema_combo"></div>
+        <div id="table_dg" style="width: 100%"></div>
+    </div>
+    <div data-options="region:'center',iconCls:'icon-ok'" style="padding-left: 10px">
+        <label>请选择数据库列</label>
+        <br>
+        <div id="chooseKey"></div>
+        <br>
+        <label>请选择非空列</label>
+        <br>
+        <div id="chooseNotNullKey"></div>
+        <br>
+        <label>请上传Excel模板</label>
+        <br>
+        <div class="easyui-filebox" id="uploadExcel" data-options="buttonText: '选择文件'" style="width: 300px"></div>
+        <br>
+        <label>请选择列名</label>
+        <br>
+        <div id="chooseColumns"></div>
+        <a href="javascript:void(0)" class="easyui-linkbutton" style="width: 120px" onclick="generatecode()">生成初始化代码</a>
+        <br>
+        <label>Excel列初始化</label>
+        <br>
+        <input class="easyui-textbox" data-options="multiline:true,editable:false" style="width: 80%;height: 300px;"
+               id="init">
+        <a href="javascript:void(0)" class="easyui-linkbutton" style="width: 80px" onclick="copyInit()">复制</a>
+        <br>
+        <label>请选择校验参数</label>
+        <br>
+        <div id="chooseParam"></div>
+        <a href="javascript:void(0)" class="easyui-linkbutton" style="width: 100px" onclick="generatemethod()">生成调用方法</a>
+        <br>
+        <label>调用方法</label>
+        <br>
+        <input class="easyui-textbox" data-options="multiline:true,editable:false" style="width: 80%;height: 250px;"
+               id="method">
+        <a href="javascript:void(0)" class="easyui-linkbutton" style="width: 80px" onclick="copyMethod()">复制</a>
+        <br>
+        <label>参数说明</label>
+        <br>
+        <input class="easyui-textbox" data-options="multiline:true,editable:false" style="width: 80%;height: 120px;"
+               id="params">
+        <a href="javascript:void(0)" class="easyui-linkbutton" style="width: 80px" onclick="copyParams()">复制</a>
+    </div>
+</div>
+<script type="text/javascript">
+    let dbColumns = "\"BZ\"";
+    let dbList = new Array();
+    let sheetColumns = "\"备注\"";
+    let sheetList = new Array();
+    let notNullColumns = "notNullColumns.add(\"BZ\");";
+    let size = 1;
+    let param = "one";
+    let initcode = `
+            //数据库里面的字段名
+            private static String[] dbColumns = {${dbColumns}};
+            //Excel里面的列名
+            private static String[] sheetColumns = {${sheetColumns}};
+            //创建一个非空校验的集合
+            private static final List<String> notNullColumns = new ArrayList();
+            //要导入的列数
+            private static int size = ${size};
+            //创建一个导入规则的集合
+            private static final List<ImportEntity> list = new ArrayList<>();
+
+            static {
+                for (int i = 0; i < size; i++) {
+                    ImportEntity entity = new ImportEntity();
+                    entity.setColumnName(sheetColumns[i]);
+                    entity.setDbColumnName(dbColumns[i]);
+                    list.add(entity);
+                }
+                //非空字段的校验
+                ${notNullColumns}
+            }
+        `;
+
+    let methodcode = `
+            List<Map> result = null;
+            String fileName = file.getOriginalFilename();
+            //裁剪出文件后缀名
+            String suffix = fileName.substring(fileName.lastIndexOf(".") + 1);
+            try {
+                if ("xls".equals(suffix.toLowerCase())) {
+                    //2003版的Excel调用2003版的导入方法
+                    result = ImportOffice2003Util.importExcel(file, list, notNullColumns, "${param}");
+                } else if ("xlsx".equals(suffix.toLowerCase())) {
+                    //2007版的Excel调用2007版的导入方法
+                    result = ImportOffice2007Util.importExcel(file, list, notNullColumns, "${param}");
+                }
+            } catch (MissingColumnsException | ValueContainsSpecialCharException | ColumnIsNullException e) {
+                //异常处理
+            }
+        `;
+
+    const paramscode = `
+            file：类型为MultipartFile
+            list：导入规则，包含数据库字段名和Excel列名的集合
+            notNullColumns：非空校验的列，与数据库字段一一对应
+            选项：one 非空列至少有一项不为空则校验通过，全部为空校验失败
+                 all 非空列必须全部不为空才能校验通过，否则校验失败
+        `;
+
+    $(function () {
+        var schema = new Array();
+
+        $.ajax({
+            url: '/getAllSchemas',
+            async: false,
+            type: "get",
+            success: function (data) {
+                schema = data.schema;
+            }
+        });
+
+        $("#schema_combo").combobox({
+            panelHeight: '200',
+            valueField: 'ID',
+            textField: 'TEXT',
+            prompt: '---请选择---',
+            data: schema,
+            onChange: function (newValue, oldValue) {
+                if (oldValue && newValue !== oldValue) {
+                    $("#table_dg").datagrid("reload", {
+                        schema: newValue
+                    });
+                }
+            }
+        });
+
+        $("#chooseKey").combobox({
+            panelHeight: 'auto',
+            valueField: 'ID',
+            textField: 'TEXT',
+            prompt: '---请选择---',
+            multiple: true,
+            onSelect:function (record) {
+                dbList.push(record.ID);
+            },
+            onUnselect:function (record) {
+                _.pull(dbList,record.ID);
+            }
+        });
+
+        $("#chooseColumns").combobox({
+            panelHeight: 'auto',
+            valueField: 'ID',
+            textField: 'TEXT',
+            prompt: '---请选择---',
+            multiple: true,
+            onSelect:function (record) {
+                sheetList.push(record.ID);
+            },
+            onUnselect:function (record) {
+                _.pull(sheetList,record.ID);
+            }
+        });
+
+        $("#chooseNotNullKey").combobox({
+            panelHeight: 'auto',
+            valueField: 'ID',
+            textField: 'TEXT',
+            prompt: '---请选择---',
+            multiple: true
+        });
+
+        $("#chooseParam").combobox({
+            panelHeight: 'auto',
+            valueField: 'ID',
+            textField: 'TEXT',
+            prompt: '---请选择---',
+            multiple: false,
+            data:[{ID:'one',TEXT:'至少一个非空'},{ID:'all',TEXT:'全部非空'}]
+        });
+
+        $("#schema_combo").combobox("select", schema[0].ID);
+
+        $("#uploadExcel").filebox({
+            onChange:function (e) {
+                uploadFile(e);
+            }
+        });
+
+        $("#table_dg").datagrid({
+            url: "/showAllTable",
+            method: "get",
+            fitColumns: true,
+            rownumbers: true,
+            singleSelect: true,
+            queryParams: {
+                schema: schema[0].ID
+            },
+            columns: [[
+                {
+                    field: 'ck',
+                    title: 'ck',
+                    width: 150,
+                    halign: 'center',
+                    align: 'center',
+                    checkbox: true
+                },
+                {
+                    field: 'Tables',
+                    title: '选择表',
+                    width: 150,
+                    halign: 'center',
+                    align: 'left'
+                }
+            ]],
+            onCheck: function (index, data) {
+                console.info(data);
+                $.ajax({
+                    url: "/getTableColumns",
+                    type: "get",
+                    data: {
+                        table_name: data.Tables,
+                        table_schema: $("#schema_combo").combobox("getValue")
+                    },
+                    success: function (obj) {
+                        $("#chooseKey").combobox("loadData", obj);
+                        $("#chooseNotNullKey").combobox("loadData", obj);
+                    }
+                })
+            }
+        });
+
+        $("#init").textbox("setValue", initcode);
+        $("#method").textbox("setValue", methodcode);
+        $("#params").textbox("setValue", paramscode);
+    });
+
+    function generatecode() {
+        let notNull = $("#chooseNotNullKey").combobox("getValues");
+        dbColumns = "";
+        notNullColumns = "";
+        sheetColumns = "";
+        for (let i = 0; i < dbList.length; i++) {
+            dbColumns += "\"" + dbList[i] + "\","
+        }
+        for (let i = 0; i < notNull.length; i++) {
+            notNullColumns +="notNullColumns.add(\"" + notNull[i] + "\");\n                "
+        }
+        for (let i = 0; i < sheetList.length; i++) {
+            sheetColumns += "\"" + sheetList[i] + "\","
+        }
+        dbColumns = dbColumns.substring(0, dbColumns.length - 1);
+        notNullColumns = notNullColumns.substring(0, notNullColumns.length - 17);
+        sheetColumns = sheetColumns.substring(0, sheetColumns.length - 1);
+        size = dbList.length;
+        let initcode = `
+            //数据库里面的字段名
+            private static String[] dbColumns = {${dbColumns}};
+            //Excel里面的列名
+            private static String[] sheetColumns = {${sheetColumns}};
+            //创建一个非空校验的集合
+            private static final List<String> notNullColumns = new ArrayList();
+            //要导入的列数
+            private static int size = ${size};
+            //创建一个导入规则的集合
+            private static final List<ImportEntity> list = new ArrayList<>();
+
+            static {
+                for (int i = 0; i < size; i++) {
+                    ImportEntity entity = new ImportEntity();
+                    entity.setColumnName(sheetColumns[i]);
+                    entity.setDbColumnName(dbColumns[i]);
+                    list.add(entity);
+                }
+                //非空字段的校验
+                ${notNullColumns}
+            }
+        `;
+        $("#init").textbox("setValue", initcode);
+    }
+
+    function generatemethod() {
+        param = $("#chooseParam").combobox("getValue");
+        let methodcode = `
+            List<Map> result = null;
+            String fileName = file.getOriginalFilename();
+            //裁剪出文件后缀名
+            String suffix = fileName.substring(fileName.lastIndexOf(".") + 1);
+            try {
+                if ("xls".equals(suffix.toLowerCase())) {
+                    //2003版的Excel调用2003版的导入方法
+                    result = ImportOffice2003Util.importExcel(file, list, notNullColumns, "${param}");
+                } else if ("xlsx".equals(suffix.toLowerCase())) {
+                    //2007版的Excel调用2007版的导入方法
+                    result = ImportOffice2007Util.importExcel(file, list, notNullColumns, "${param}");
+                }
+            } catch (MissingColumnsException | ValueContainsSpecialCharException | ColumnIsNullException e) {
+                //异常处理
+            }
+        `;
+        $("#method").textbox("setValue", methodcode);
+    }
+
+    function copyInit() {
+        let aux = document.createElement("input");
+        aux.setAttribute("value", initcode);
+        document.body.appendChild(aux);
+        aux.select();
+        document.execCommand("copy");
+        document.body.removeChild(aux);
+        $.messager.alert("提示", "复制成功");
+    }
+
+    function copyMethod() {
+        let aux = document.createElement("input");
+        aux.setAttribute("value", methodcode);
+        document.body.appendChild(aux);
+        aux.select();
+        document.execCommand("copy");
+        document.body.removeChild(aux);
+        $.messager.alert("提示", "复制成功");
+    }
+
+    function copyParams() {
+        let aux = document.createElement("input");
+        aux.setAttribute("value", paramscode);
+        document.body.appendChild(aux);
+        aux.select();
+        document.execCommand("copy");
+        document.body.removeChild(aux);
+        $.messager.alert("提示", "复制成功");
+    }
+
+    function uploadFile(e) {
+        let files = $("#uploadExcel").next().find('input[type=file]')[0].files;
+        let formData = new FormData();
+        formData.append("wenjian",files[0]);
+        $.ajax({
+            url: '/importExcel',
+            type: 'POST',
+            processData: false,
+            contentType: false,
+            data: formData,
+            success: function (data) {
+                $("#chooseColumns").combobox("loadData", data);
+            }
+        })
+    }
+</script>
+</body>
+</html>

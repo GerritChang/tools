@@ -1,0 +1,73 @@
+[
+  {
+    "id": "1",
+    "text": "工具菜单配置",
+    "children": [],
+    "url": "/setupMenu",
+    "state": "open",
+    "_parentId": "0"
+  },
+  {
+    "text": "SQL生成",
+    "id": "2",
+    "_parentId": "0",
+    "url": "",
+    "state": "closed"
+  },
+  {
+    "text": "Mybatis插入更新SQL",
+    "id": "3",
+    "_parentId": "2",
+    "url": "/mybatisSqlGenerate",
+    "state": "open"
+  },
+  {
+    "text": "Mybatis查询SQL",
+    "id": "4",
+    "_parentId": "2",
+    "url": "/sqlGenerate",
+    "state": "open"
+  },
+  {
+    "text": "前端拖拽生成",
+    "id": "5",
+    "_parentId": "0",
+    "url": "/draggable",
+    "state": "open"
+  },
+  {
+    "text": "前端表格生成",
+    "id": "6",
+    "_parentId": "0",
+    "url": "/columns",
+    "state": "open"
+  },
+  {
+    "text": "附件上传",
+    "id": "7",
+    "_parentId": "0",
+    "url": "/upload",
+    "state": "open"
+  },
+  {
+    "text": "websocket在线测试",
+    "id": "8",
+    "_parentId": "0",
+    "url": "/websocket",
+    "state": "open"
+  },
+  {
+    "text": "文件下载测试",
+    "id": "9",
+    "_parentId": "0",
+    "url": "/downloadPage",
+    "state": "open"
+  },
+  {
+    "text": "Excel导入代码生成",
+    "id": "10",
+    "_parentId": "0",
+    "url": "/import",
+    "state": "open"
+  }
+]

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="./jquery.min.js" type="text/javascript"></script>
+    <script src="./jquery.easyui.min.js" type="text/javascript"></script>
+    <link rel="stylesheet" type="text/css" href="themes/bootstrap/easyui.css">
+    <script src="public/public.js" type="text/javascript"></script>
+    <style>
+        iframe {
+            border-width: 0px;
+        }
+    </style>
+</head>
+<body>
+<div class="easyui-layout" style="width:100%;height:1080px;">
+    <div data-options="region:'west',split:true" title="选择菜单" style="width:300px;height:800px;">
+        <div id="treeMenu"></div>
+    </div>
+    <div data-options="region:'center',title:'配置项',iconCls:'icon-ok'" style="padding-left: 10px;padding-top: 10px">
+        <form id="submitForm" action="submitForm" method="post">
+            <input name="selectTreeNode" style="display: none">
+            <p>本系统配置需要严格按照html模板进行，新增菜单需要为中文名，html文件名必须遵循英文驼峰命名，Java代码中必须包含public的类</p>
+            <label>新增节点名：</label>
+            <input class="easyui-textbox" name="nodeNames" id="nodeNames" style="width: 200px"
+                   data-options="required:true,validType:'CHS'">
+            <label>html文件名：</label>
+            <input class="easyui-textbox" name="htmlFileName" id="htmlFileName" style="width: 200px"
+                   data-options="required:true,validType:'english'">
+            <label>URL地址：</label>
+            <input class="easyui-textbox" name="urlSite" id="urlSite" style="width: 200px"
+                   data-options="required:true,validType:'selfUrl'">
+            <a href="javascript:void(0)" class="easyui-linkbutton" style="width: 80px" onclick="saveForm()">保存</a>
+            <br>
+            <p style="height: 2px"></p>
+            <label>html文本：</label>
+            <input class="easyui-textbox" name="htmlTexts" id="htmlTexts" style="width: 600px;height: 300px"
+                   data-options="multiline:true">
+            <br>
+            <p style="height: 2px"></p>
+            <label>java代码：</label>
+            <input class="easyui-textbox" name="javaCodes" id="javaCodes" style="width: 600px;height: 300px"
+                   data-options="multiline:true">
+        </form>
+    </div>
+</div>
+<script>
+    $(function () {
+        let noneRoot = {id: '0', text: '无父节点', state: "open"};
+
+        $("#treeMenu").tree({
+            idField: 'id',
+            textField: 'text',
+            method: 'get',
+            url: "/queryMenuList",
+            singleSelect: false,
+            loadFilter: function (data) {
+                let flag = false;
+                for (let i = 0; i < data.length; i++) {
+                    if (data[i]._parentId === "0") {
+                        flag = true;
+                    }
+                }
+                if (flag === true) {
+                    var _data = new Array();
+                    _data.push(noneRoot);
+                    for (let i = 0; i < data.length; i++) {
+                        _data.push(data[i]);
+                    }
+                    return _data;
+                }else{
+                    return data;
+                }
+            }
+        });
+
+        $.extend($.fn.validatebox.defaults.rules, {
+            CHS: {
+                validator: function (value) {
+                    return /^[\u0391-\uFFE5]+$/.test(value);
+                },
+                message: '请输入汉字'
+            },
+            english: {
+                validator: function (value) {
+                    return /^[A-Za-z]+$/i.test(value);
+                },
+                message: '请输入英文'
+            },
+            selfUrl:{
+                validator: function (value) {
+                    return /^[/A-Za-z]+$/i.test(value);
+                },
+                message: '请输入URL'
+            }
+        })
+    });
+
+    function saveForm() {
+        var selectTreeNode = $("#treeMenu").tree("getSelected");
+        if (selectTreeNode) {
+            $("#selectTreeNode").val(selectTreeNode.id);
+            let javaCode = $("#javaCodes").textbox("getValue");
+            if (javaCode.indexOf("public class") != -1) {
+                $("#submitForm").form("submit");
+            } else {
+                $.messager.alert("提示", "Java代码必须包含public的类")
+            }
+        } else {
+            $.messager.alert("提示", "请先选择父节点");
+        }
+    }
+
+</script>
+</body>
+</html>

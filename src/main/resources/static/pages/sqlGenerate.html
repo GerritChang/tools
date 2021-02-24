@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Demo</title>
+    <script src="./jquery.min.js" type="text/javascript"></script>
+    <script src="./jquery.easyui.min.js" type="text/javascript"></script>
+    <link rel="stylesheet" type="text/css" href="themes/bootstrap/easyui.css">
+    <script src="public/public.js" type="text/javascript"></script>
+</head>
+<body>
+<div class="easyui-layout" style="width:100%;height:900px;">
+    <div data-options="region:'west',split:true" title="表" style="width:300px;">
+<!--        <span><a href="javascript:;" class="easyui-linkbutton" style="margin: 2px 2px 2px 2px;float: right"-->
+<!--                 onclick="confirm()">确定</a></span>-->
+        <div id="schema_combo"></div>
+        <div id="table_dg" style="width: 100%"></div>
+    </div>
+    <div data-options="region:'center',title:'SQL调试窗口',iconCls:'icon-ok'">
+        <form style="width: 100%;padding-left: 10px;padding-top: 10px;padding-right: 10px">
+            <label>请选择连接方式</label>
+            <div id="connectType"></div>
+            <label>一键生成单表、多表查询SQL</label>
+            <a href="javascript:;" class="easyui-linkbutton" onclick="onkey()">一键生成</a>
+            <div style="background-color: #d9d9d9;height: 1px;width: 100%;margin-top: 2px"></div>
+        </form>
+        <label>SQL测试</label>
+        <input class="easyui-textbox" data-options="multiline:true" style="width: 100%;height: 150px" id="SQLTest">
+        <span><a href="javascript:;" class="easyui-linkbutton" style="margin: 2px 2px 2px 2px;margin-left: 45%"
+                 onclick="sqltest()">测试</a></span>
+        <br/>
+        <label>测试结果</label>
+        <div class="easyui-textbox" data-options="multiline:true" style="width: 100%;height: 150px" id="SQLTestResult">
+    </div>
+</div>
+<script type="text/javascript">
+    // commonUri = "http://localhost:8080/"
+
+    let result = "";
+    $(function () {
+
+        var schema = new Array();
+
+        $.ajax({
+            url: '/getAllSchemas',
+            async: false,
+            type: "get",
+            success: function (data) {
+                schema = data.schema;
+            }
+        });
+
+        $("#schema_combo").combobox({
+            panelHeight: '200',
+            valueField: 'ID',
+            textField: 'TEXT',
+            prompt: '---请选择---',
+            data: schema,
+            onChange: function (newValue, oldValue) {
+                if (oldValue && newValue !== oldValue) {
+                    $("#table_dg").datagrid("reload", {
+                        schema: newValue
+                    });
+                }
+            }
+        });
+
+        $("#schema_combo").combobox("select", schema[0].ID);
+
+        const comboData = [{"ID": "0", "TEXT": "单表查询"}, {"ID": "1", "TEXT": "内连接"}, {
+            "ID": "2",
+            "TEXT": "左连接"
+        }, {"ID": "3", "TEXT": "右连接"}, {
+            "ID": "4",
+            "TEXT": "笛卡尔积"
+        }];
+
+        $("#connectType").combobox({
+            panelHeight: 'auto',
+            valueField: 'ID',
+            textField: 'TEXT',
+            data: comboData,
+            prompt: '---请选择---'
+        });
+
+        $("#table_dg").datagrid({
+            url: "/showAllTable",
+            method: "get",
+            fitColumns: true,
+            rownumbers: true,
+            singleSelect: false,
+            queryParams: {
+                schema: schema[0].ID
+            },
+            columns: [[
+                {
+                    field: 'ck',
+                    title: 'ck',
+                    width: 150,
+                    halign: 'center',
+                    align: 'center',
+                    checkbox: true
+                },
+                {
+                    field: 'Tables',
+                    title: '选择表',
+                    width: 150,
+                    halign: 'center',
+                    align: 'center'
+                }
+            ]]
+        })
+    });
+
+    function confirm() {
+        var rows = $("#table_dg").datagrid("getRows");
+        console.info(rows);
+    }
+
+    function sqltest() {
+        result = "";
+        var sql = $("#SQLTest").textbox("getValue");
+        if (sql) {
+            $.ajax({
+                url: "/sqlTest",
+                type: "post",
+                data: {
+                    sql: sql
+                },
+                success: function (data) {
+                    if (data.state === "success") {
+                        result += data.result;
+                        $("#SQLTestResult").textbox("setValue",result);
+                    }
+                }
+            })
+        } else {
+            $.messager.alert("提示", "请输入SQL命令");
+        }
+    }
+
+    function onkey() {
+        var rows = $("#table_dg").datagrid("getSelections");
+        if (rows.length === 0) {
+            $.messager.alert("提示", "请先选择要生成SQL的表");
+            return;
+        }
+        if (rows.length === 1) {
+            $("#connectType").combobox("setValue", "0");
+        }
+        var connectType = $("#connectType").combobox("getValue");
+        if (!connectType) {
+            $.messager.alert("提示", "请先选择一个连接类型");
+            return;
+        }
+        $.ajax({
+            url: "/oneKey",
+            type: "post",
+            data: {
+                rows: JSON.stringify(rows),
+                connectType: connectType
+            },
+            success: function (data) {
+                $("#SQLTest").textbox("setValue", data.SQL);
+            }
+        })
+    }
+</script>
+</body>
+</html>

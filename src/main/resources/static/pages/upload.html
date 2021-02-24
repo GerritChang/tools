@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title>附件上传</title>
+    <script type="text/javascript" src="./vue/js/vue.js"></script>
+    <script type="text/javascript" src="./vue/js/index.js"></script>
+    <script type="text/javascript" src="./vue/js/spark-md5.js"></script>
+    <link rel="stylesheet" href="./vue/css/index.css"/>
+</head>
+<body>
+<div id="root" style="max-width: 30%;width: 30%;">
+    <el-upload
+            class="upload-demo"
+            ref="upload"
+            action="http://127.0.0.1:8080/uploadFile"
+            :data="uploadParam"
+            :on-preview="handlePreview"
+            :on-remove="handleRemove"
+            :on-change="handleChange"
+            :before-upload="beforeUpload"
+            :file-list="fileList"
+            :auto-upload="false">
+        <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
+        <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">上传到服务器</el-button>
+        <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
+    </el-upload>
+</div>
+<script type="text/javascript">
+    let username = "test";
+    let _this;
+    let socket = new WebSocket("ws://127.0.0.1:8080/uploadByWs/" + username);
+    socket.onopen = function (event) {
+        onOpen(event);
+    };
+    socket.onmessage = function (event) {
+        onMessage(event);
+    };
+    socket.onerror = function (event) {
+        onError(event);
+    };
+
+    function onOpen(event) {
+        console.info("websocket连接建立成功" + event);
+    }
+
+    function onMessage(event) {
+        if (event && event.data && event.data !== "连接已建立") {
+            const message = JSON.parse(event.data);
+            if (message.status === true) {
+                _this.showMessage(message.message);
+            }
+        }
+    }
+
+    function onError(event) {
+        console.info(event);
+    }
+
+    new Vue({
+        el: '#root',
+        data() {
+            return {
+                fileList: [],
+                uploadParam: {},
+                uploadParamArr: []
+            };
+        },
+        mounted() {
+            _this = this;
+        },
+        methods: {
+            submitUpload() {
+                this.$refs.upload.submit();
+            },
+            handleRemove(file, fileList) {
+                console.log(file, fileList);
+            },
+            handlePreview(file) {
+                console.log(file);
+            },
+            handleChange(file, fileList) {
+                const blobSlice = File.prototype.slice || File.prototype.mozSlice || File.prototype.webkitSlice;
+                const chunkSize = 2097152;
+                const fileReader = new FileReader();
+                const chunks = Math.ceil(file.size / chunkSize);
+                let currentChunk = 0;
+                const spark = new SparkMD5.ArrayBuffer();
+
+                fileReader.onload = function (e) {
+                    spark.append(e.target.result);
+                    currentChunk++;
+                    if (currentChunk < chunks) {
+                        loadNext()
+                    } else {
+                        const sparkEnd = spark.end();
+                        if (_this.uploadParamArr.length > 0) {
+                            for (let i = 0; i < _this.uploadParamArr.length; i++) {
+                                if (_this.uploadParamArr[i].md5value == sparkEnd) {
+                                    return;
+                                }
+                            }
+                        }
+                        let params = {};
+                        params.id = file.uid;
+                        params.filename = file.name;
+                        params.fileSize = file.size;
+                        params.md5value = sparkEnd;
+                        params.username = "test";
+                        params.businessId = "123";
+                        _this.uploadParamArr.push(params);
+                        console.info(_this.uploadParamArr);
+                    }
+                };
+                fileReader.onerror = function () {
+                    console.warn('FileReader error.')
+                };
+
+                function loadNext() {
+                    const start = currentChunk * chunkSize;
+                    const end = ((start + chunkSize) >= file.size) ? file.size : start + chunkSize;
+                    fileReader.readAsArrayBuffer(blobSlice.call(file.raw, start, end))
+                }
+
+                loadNext()
+            },
+            beforeUpload(file) {
+                this.uploadParam.param = JSON.stringify(this.uploadParamArr);
+            },
+            showMessage(message) {
+                this.$message({
+                    message: message,
+                    type: 'success'
+                });
+            }
+        }
+    })
+</script>
+</body>
+</html>

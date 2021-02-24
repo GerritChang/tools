@@ -1,0 +1,19 @@
+{"total":7,"rows":[
+	{"id":"id","name":"id","value":"","group":"基本设置","editor":"text"},
+	{"id":"name","name":"name","value":"","group":"基本设置","editor":"text"},
+	{"id":"placeholder","name":"预设值","value":"","group":"基本设置","editor":"text"},
+	{"id":"fontsize","name":"字体大小","value":"","group":"基本设置","editor":"numberbox"},
+	{"id":"textalign","name":"对齐方式","value":"","group":"基本设置","editor":"combobox"},
+	{"id":"maxvalue","name":"最大值","value":"","group":"基本设置","editor":"numberbox"},
+	{"id":"minvalue","name":"最小值","value":"","group":"基本设置","editor":"numberbox"},
+	{"id":"height","name":"高度","value":"","group":"基本设置","editor":"numberspinner"},
+	{"id":"length","name":"长度","value":"","group":"基本设置","editor":"numberspinner"},
+	{"id":"multiline","name":"多行","value":"false","group":"高级设置","editor":{
+		"type":"checkbox",
+		"options":{
+			"on":true,
+			"off":false
+		}
+	}},
+	{"id":"url","name":"URL","value":"","group":"高级设置","editor":"numberbox"}
+]}
