@@ -12,7 +12,6 @@ import java.util.Map;
  *
  * @author zhangguantao
  * @version 0.1
- * @company victorySoft
  */
 public class HttpUtils {
 	public static String uploadFile(String url, InputStream fileInputStream, String fileName) {
