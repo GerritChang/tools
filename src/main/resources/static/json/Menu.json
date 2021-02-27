@@ -78,10 +78,24 @@
     "state": "open"
   },
   {
-    "text": "websocket在线测试",
+    "text": "接口操作",
     "id": "12",
     "_parentId": "0",
+    "url": "",
+    "state": "closed"
+  },
+  {
+    "text": "websocket在线测试",
+    "id": "13",
+    "_parentId": "12",
     "url": "/websocket",
+    "state": "open"
+  },
+  {
+    "text": "循环调用接口",
+    "id": "13",
+    "_parentId": "12",
+    "url": "/foreach",
     "state": "open"
   }
 ]

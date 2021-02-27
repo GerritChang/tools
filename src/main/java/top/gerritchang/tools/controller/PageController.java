@@ -17,6 +17,7 @@ public class PageController {
     private final String WEBSOCKET = "websocketTest";
     private final String DOWNLOAD = "download";
     private final String IMPORT = "importExcel";
+    private final String FOREACH = "foreach";
 
     @RequestMapping("/")
     public String toIndex(){
@@ -71,5 +72,10 @@ public class PageController {
     @GetMapping("/import")
     public String getImport(){
         return IMPORT;
+    }
+
+    @GetMapping("/foreach")
+    public String getForeach(){
+        return FOREACH;
     }
 }
