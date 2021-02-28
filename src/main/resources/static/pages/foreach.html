@@ -17,17 +17,34 @@
         <br>
         <span><a href="javascript:;" class="easyui-linkbutton" style="margin: 2px 2px 2px 2px"
                  onclick="addParams()">添加参数</a></span>
+        <div id="dom"></div>
         <br>
-        <label style="width: 120px;">参数名</label>
-        <input class="easyui-textbox" style="width: 120px;" id="fileName">
-        <label>参数取值方式</label>
-        <input style="width: 120px;" id="way">
+        <span><a href="javascript:;" class="easyui-linkbutton" style="margin: 2px 2px 2px 2px"
+                 onclick="runcode()">执行</a></span>
         <br>
         <p style="height: 1px;width: 100%"></p>
-        <input class="easyui-textbox" data-options="multiline:true" style="width: 80%;height: 300px;" id="content">
+        <input class="easyui-textbox" data-options="multiline:true,editable:false" style="width: 80%;height: 300px;" id="content">
     </div>
 </div>
 <script type="text/javascript">
+
+    let number = 0;
+    let dom = "";
+    let number_element = `<label style="width: 120px;">开始数字</label>
+        <input class="easyui-textbox" style="width: 120px;" id="startnumber${number}">
+            <label style="width: 120px;">结束数字</label>
+        <input class="easyui-textbox" style="width: 120px;" id="endnumber${number}">`;
+    let alphabet_element = `<label style="width: 120px;">开始字母</label>
+        <input class="easyui-textbox" style="width: 120px;" id="startalphabet${number}">
+            <label style="width: 120px;">结束字母</label>
+        <input class="easyui-textbox" style="width: 120px;" id="endalphabet${number}">`;
+    let database_element = `<label style="width: 120px;">选择字段</label>
+        <input class="easyui-textbox" style="width: 120px;" id="database${number}">
+        <span><a href="javascript:;" class="easyui-linkbutton" style="margin: 2px 2px 2px 2px"
+                 onclick="choose(number)">选择</a></span>`;
+    let static_element = `<label style="width: 120px;">固定值</label>
+        <input class="easyui-textbox" style="width: 120px;" id="staticnumber${number}">`;
+
     $(function () {
        $("#way").combobox({
            panelHeight: 'auto',
@@ -39,6 +56,52 @@
     });
 
     function addParams() {
+        const element = "<br><label style=\"width: 120px;\">参数名</label>"
+        +"<input class=\"easyui-textbox\" style=\"width: 120px;\" id=\"fileName\">"
+        +"<label>参数取值方式</label>"
+        +"<input class=\"easyui-combobox\" data-options=\"panelHeight: 'auto',"
+           +"valueField: 'ID',"
+           +"textField: 'TEXT',"
+           +"prompt: '---请选择---',"
+           +"data:[{ID:'1',TEXT:'数字循环'},{ID:'2',TEXT:'字母循环'},{ID:'3',TEXT:'数据库取值'},{ID:'4',TEXT:'固定值'}],"
+           +"onSelect:onSelect\" style=\"width: 120px;\" id=\"way"+number+"\">"
+           +"<div id=\"buttoncontent"+number+"\" style=\"display: inline!important;\"></div>";
+        dom += element;
+        number += 1;
+        $("#dom").html(dom);
+        $.parser.parse($("#dom"));
+    }
+
+    function onSelect(record) {
+        let id = this.id;
+        id = id.replace("way","");
+        let buttoncontent;
+        switch (record.ID) {
+            case "1":
+                buttoncontent = number_element;
+                break;
+            case "2":
+                buttoncontent = alphabet_element;
+                break;
+            case "3":
+                buttoncontent = database_element;
+                break;
+            case "4":
+                buttoncontent = static_element;
+                break;
+            default:
+                buttoncontent = static_element;
+                break;
+        }
+        $("#buttoncontent"+id).html(buttoncontent);
+        $.parser.parse($("#buttoncontent"+id));
+    }
+
+    function choose(num) {
+        alert(num);
+    }
+
+    function runcode() {
 
     }
 </script>
