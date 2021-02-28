@@ -47,6 +47,23 @@
     </div>
 </div>
 <script type="text/javascript">
+    let socket = new WebSocket("ws://localhost:8081/foreach/gerritchang");
+
+    socket.onopen = function(){
+        console.info("连接已成功建立");
+    };
+
+    socket.onclose = function(){
+        console.info("连接已关闭");
+    };
+
+    socket.onerror = function(){
+        console.info("连接出错");
+    };
+
+    socket.onmessage = function(event){
+        $("#content").textbox("setValue",event.data);
+    };
 
     let number = 0;
     let dom = "";
@@ -174,7 +191,7 @@
     function addParams() {
         const num = number;
         const element = "<br><label style=\"width: 120px;\">参数名</label>"
-        +"<input class=\"easyui-textbox\" style=\"width: 120px;\" id=\"fileName\">"
+        +"<input class=\"easyui-textbox\" style=\"width: 120px;\" id=\"param"+num+"\">"
         +"<label>参数取值方式</label>"
         +"<input class=\"easyui-combobox\" data-options=\"panelHeight: 'auto',"
            +"valueField: 'ID',"
@@ -235,7 +252,57 @@
     }
 
     function runcode() {
+        let url = $("#url").textbox("getValue");
+        let arr = new Array();
+        arr.push({key:url});
+        for (let i = 0; i < number; i++) {
+            let type = $("#way"+i).combobox("getValue");
+            let obj = getJson(type,i);
+            arr.push(obj);
+        }
+        socket.send(JSON.stringify(arr));
+    }
 
+    function getJson(type,num) {
+        let object = {};
+        let key;
+        switch (type) {
+            case "1":
+                key = $("#param"+num).textbox("getValue");
+                let startnumber = $("#startnumber"+num).textbox("getValue");
+                let endnumber = $("#endnumber"+num).textbox("getValue");
+                object.key = key;
+                object.startnumber = startnumber;
+                object.endnumber = endnumber;
+                break;
+            case "2":
+                key = $("#param"+num).textbox("getValue");
+                let startalphabet = $("#startalphabet"+num).textbox("getValue");
+                let endalphabet = $("#endalphabet"+num).textbox("getValue");
+                object.key = key;
+                object.startalphabet = startalphabet;
+                object.endalphabet = endalphabet;
+                break;
+            case "3":
+                key = $("#param"+num).textbox("getValue");
+                let schema = $("#schema"+num).textbox("getValue");
+                let table = $("#table"+num).textbox("getValue");
+                let database = $("#database"+num).textbox("getValue");
+                object.key = key;
+                object.schema = schema;
+                object.table = table;
+                object.database = database;
+                break;
+            case "4":
+                key = $("#param"+num).textbox("getValue");
+                let staticnumber = $("#staticnumber"+i).textbox("getValue");
+                object.key = key;
+                object.staticnumber = staticnumber;
+                break;
+            default:
+                break;
+        }
+        return object;
     }
 </script>
 </body>

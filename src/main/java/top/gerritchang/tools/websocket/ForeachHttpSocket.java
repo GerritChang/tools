@@ -11,6 +11,7 @@ import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -45,8 +46,19 @@ public class ForeachHttpSocket {
 
     @OnMessage
     public void onMessage(String message){
+        System.out.println(message);
         Gson gson = new Gson();
-        Map paramsMap = gson.fromJson(message, Map.class);
+        List<Map> list = gson.fromJson(message, List.class);
+        Iterator<Map> iterator = list.iterator();
+        String url;
+        while (iterator.hasNext()){
+            Map map = iterator.next();
+            if (map.get("key").toString().indexOf("http")!= -1){
+                url = map.get("key").toString();
+            }else{
+
+            }
+        }
         String result = HttpUtils.sendGETCommon("",null);
         this.sendMessage(this.SUCCESS,"第"+"次请求结果为："+result);
     }
