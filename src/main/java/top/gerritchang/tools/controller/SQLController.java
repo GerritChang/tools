@@ -173,12 +173,27 @@ public class SQLController {
             for (Map map : list) {
                 if (!primaryKey.equals(map.get("COLUMN_NAME").toString())) {
                     String column_name = map.get("COLUMN_NAME").toString();
-                    columnBuffer.append("<if test=\"").append(column_name).append(" != null").append("\">\n")
+                    columnBuffer.append("<if test=\"").append(column_name).append(" != null");
+                    if ("NUMBER".equals(map.get("DATA_TYPE").toString().toUpperCase())){
+                        columnBuffer.append(" or ").append(column_name).append("==0");
+                    }
+                    columnBuffer.append("\">\n")
                             .append(",").append(column_name).append("\n")
                             .append("</if>").append("\n");
-                    valueBuffer.append("<if test=\"").append(column_name).append(" != null").append("\">\n")
-                            .append(",").append("#{").append(column_name).append("}").append("\n")
-                            .append("</if>").append("\n");
+                    valueBuffer.append("<if test=\"").append(column_name).append(" != null");
+                    if ("NUMBER".equals(map.get("DATA_TYPE").toString().toUpperCase())){
+                        valueBuffer.append(" or ").append(column_name).append("==0");
+                    }
+                    if ("DATE".equals(map.get("DATA_TYPE").toString().toUpperCase())){
+                        valueBuffer.append("\">\n")
+                                .append(",").append("to_date('yyyy-MM-dd HH24:mi:ss',")
+                                .append("#{").append(column_name).append("})").append("\n")
+                                .append("</if>").append("\n");
+                    }else{
+                        valueBuffer.append("\">\n")
+                                .append(",").append("#{").append(column_name).append("}").append("\n")
+                                .append("</if>").append("\n");
+                    }
                 }
             }
             stringBuffer.append(primaryKey).append("\n")
@@ -195,12 +210,27 @@ public class SQLController {
                 }
                 if (!flag) {
                     String column_name = map.get("COLUMN_NAME").toString();
-                    columnBuffer.append("<if test=\"").append(column_name).append(" != null").append("\">\n")
+                    columnBuffer.append("<if test=\"").append(column_name).append(" != null");
+                    if ("NUMBER".equals(map.get("DATA_TYPE").toString().toUpperCase())){
+                        columnBuffer.append(" or ").append(column_name).append("==0");
+                    }
+                    columnBuffer.append("\">\n")
                             .append(",").append(column_name).append("\n")
                             .append("</if>").append("\n");
-                    valueBuffer.append("<if test=\"").append(column_name).append(" != null").append("\">\n")
-                            .append(",").append("#{").append(column_name).append("}").append("\n")
-                            .append("</if>").append("\n");
+                    valueBuffer.append("<if test=\"").append(column_name).append(" != null");
+                    if ("NUMBER".equals(map.get("DATA_TYPE").toString().toUpperCase())){
+                        valueBuffer.append(" or ").append(column_name).append("==0");
+                    }
+                    if ("DATE".equals(map.get("DATA_TYPE").toString().toUpperCase())){
+                        valueBuffer.append("\">\n")
+                                .append(",").append("to_date('yyyy-MM-dd HH24:mi:ss',")
+                                .append("#{").append(column_name).append("})").append("\n")
+                                .append("</if>").append("\n");
+                    }else{
+                        valueBuffer.append("\">\n")
+                                .append(",").append("#{").append(column_name).append("}").append("\n")
+                                .append("</if>").append("\n");
+                    }
                 }
             }
             for (int i = 0; i < uniKeyList.size(); i++) {
@@ -373,10 +403,22 @@ public class SQLController {
                 .append("}\n");
         for (Map map : list) {
             String column_name = map.get("COLUMN_NAME").toString();
+            String type = map.get("DATA_TYPE").toString();
             if (!primaryKey.equals(column_name)) {
-                stringBuffer.append("<if test=\"").append(column_name).append(" != null \">\n")
-                        .append(",").append(column_name).append("=#{").append(column_name).append("}\n")
-                        .append("</if>\n");
+                stringBuffer.append("<if test=\"").append(column_name).append(" != null");
+                if ("NUMBER".equals(type.toUpperCase())){
+                    stringBuffer.append(" or ").append(column_name).append(" == 0");
+                }
+                if ("DATE".equals(map.get("DATA_TYPE").toString().toUpperCase())){
+                    stringBuffer.append("\">\n")
+                            .append(",").append(column_name).append("=to_date('yyyy-MM-dd HH24:mi:ss',")
+                            .append("#{").append(column_name).append("})").append("\n")
+                            .append("</if>").append("\n");
+                }else{
+                    stringBuffer.append("\">\n")
+                            .append(",").append(column_name).append("=#{").append(column_name).append("}").append("\n")
+                            .append("</if>").append("\n");
+                }
             }
         }
         stringBuffer.append("where ").append(primaryKey).append("=#{").append(primaryKey).append("}");
@@ -426,9 +468,20 @@ public class SQLController {
                 }
             }
             if (!flag) {
-                stringBuffer.append("<if test=\"").append(column_name).append(" != null\">\n")
-                        .append(",").append(column_name).append("=#{").append(column_name).append("}\n")
-                        .append("</if>\n");
+                stringBuffer.append("<if test=\"").append(column_name).append(" != null");
+                if ("NUMBER".equals(map.get("DATA_TYPE").toString().toUpperCase())){
+                    stringBuffer.append(" or ").append(column_name).append(" == 0");
+                }
+                if ("DATE".equals(map.get("DATA_TYPE").toString().toUpperCase())){
+                    stringBuffer.append("\">\n")
+                            .append(",").append(column_name).append("=to_date('yyyy-MM-dd HH24:mi:ss',")
+                            .append("#{").append(column_name).append("})").append("\n")
+                            .append("</if>").append("\n");
+                }else{
+                    stringBuffer.append("\">\n")
+                            .append(",").append(column_name).append("=#{").append(column_name).append("}").append("\n")
+                            .append("</if>").append("\n");
+                }
             }
         }
         stringBuffer.append("where ").append(whereBuffer);

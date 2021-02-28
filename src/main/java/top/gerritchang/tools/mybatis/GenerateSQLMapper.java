@@ -23,7 +23,6 @@ public interface GenerateSQLMapper {
             "        where table_name=#{table_name} and table_schema=#{table_schema}")
     List<Map> getMySQLTableColumns(Map map);
 
-    @Select("select A.COLUMN_NAME" +
-            "        from ALL_COL_COMMENTS A where A.OWNER = #{table_schema} and A.table_name=#{table_name}")
+    @Select("select A.COLUMN_NAME,A.DATA_TYPE from all_tab_cols A where A.OWNER = #{table_schema} and A.table_name=#{table_name}")
     List<Map> getOracleTableColumns(Map map);
 }
