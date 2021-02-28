@@ -26,26 +26,142 @@
         <input class="easyui-textbox" data-options="multiline:true,editable:false" style="width: 80%;height: 300px;" id="content">
     </div>
 </div>
+<div id="win" class="easyui-window" title="选择数据库字段" style="width:800px;height:500px"
+     data-options="iconCls:'icon-save',modal:true,closed:true">
+    <div class="easyui-layout" style="width:100%;height:100%;">
+        <div data-options="region:'center',split:true" title="表" style="width:100%;height:70%;padding-left: 2px">
+            <label>选择表空间</label>
+            <div id="schema_combo"></div>
+            <div id="table_dg" style="width: 100%"></div>
+        </div>
+        <div data-options="region:'south',title:'选择字段'" style="height: 30%">
+            <label>请选择数据库字段</label>
+            <br>
+            <div id="chooseKey"></div>
+            <input id="number" style="display: none">
+            <div id="bb" style="text-align: center">
+                <a href="javascript:;" onclick="confirmcolumn()" class="easyui-linkbutton">确定</a>
+                <a href="javascript:;" onclick="closewindow()" class="easyui-linkbutton">关闭</a>
+            </div>
+        </div>
+    </div>
+</div>
 <script type="text/javascript">
 
     let number = 0;
     let dom = "";
-    let number_element = `<label style="width: 120px;">开始数字</label>
-        <input class="easyui-textbox" style="width: 120px;" id="startnumber${number}">
-            <label style="width: 120px;">结束数字</label>
-        <input class="easyui-textbox" style="width: 120px;" id="endnumber${number}">`;
-    let alphabet_element = `<label style="width: 120px;">开始字母</label>
-        <input class="easyui-textbox" style="width: 120px;" id="startalphabet${number}">
-            <label style="width: 120px;">结束字母</label>
-        <input class="easyui-textbox" style="width: 120px;" id="endalphabet${number}">`;
-    let database_element = `<label style="width: 120px;">选择字段</label>
-        <input class="easyui-textbox" style="width: 120px;" id="database${number}">
-        <span><a href="javascript:;" class="easyui-linkbutton" style="margin: 2px 2px 2px 2px"
-                 onclick="choose(number)">选择</a></span>`;
-    let static_element = `<label style="width: 120px;">固定值</label>
-        <input class="easyui-textbox" style="width: 120px;" id="staticnumber${number}">`;
+    function getnumber_element(num){
+        let number_element = `<label style="width: 120px;">开始数字</label>
+            <input class="easyui-textbox" style="width: 120px;" id="startnumber${num}">
+                <label style="width: 120px;">结束数字</label>
+            <input class="easyui-textbox" style="width: 120px;" id="endnumber${num}">`;
+        return number_element;
+    }
+    function getalphabet_element(num){
+        let alphabet_element = `<label style="width: 120px;">开始字母</label>
+            <input class="easyui-textbox" style="width: 120px;" id="startalphabet${num}">
+                <label style="width: 120px;">结束字母</label>
+            <input class="easyui-textbox" style="width: 120px;" id="endalphabet${num}">`;
+        return alphabet_element;
+    }
+
+    function getdatabase_element(num){
+        let database_element = `<label style="width: 120px;">选择表空间</label>
+            <input class="easyui-textbox" style="width: 120px;" id="schema${num}" data-options="editable:false">
+            <label style="width: 120px;">选择表</label>
+            <input class="easyui-textbox" style="width: 120px;" id="table${num}" data-options="editable:false">
+            <label style="width: 120px;">选择字段</label>
+            <input class="easyui-textbox" style="width: 120px;" id="database${num}" data-options="editable:false">
+            <span><a href="javascript:;" class="easyui-linkbutton" style="margin: 2px 2px 2px 2px"
+                 onclick="choose(${num})">选择</a></span>`;
+        return database_element;
+    }
+
+    function getstatic_element(num){
+        let static_element = `<label style="width: 120px;">固定值</label>
+            <input class="easyui-textbox" style="width: 120px;" id="staticnumber${num}">`;
+        return static_element;
+    }
 
     $(function () {
+        var schema = new Array();
+
+        $.ajax({
+            url: '/getAllSchemas',
+            async: false,
+            type: "get",
+            success: function (data) {
+                schema = data.schema;
+            }
+        });
+
+        $("#schema_combo").combobox({
+            panelHeight: '200',
+            valueField: 'ID',
+            textField: 'TEXT',
+            prompt: '---请选择---',
+            data: schema,
+            onChange: function (newValue, oldValue) {
+                if (oldValue && newValue !== oldValue) {
+                    $("#table_dg").datagrid("reload", {
+                        schema: newValue
+                    });
+                }
+            }
+        });
+
+        $("#schema_combo").combobox("select", schema[0].ID);
+
+        $("#chooseKey").combobox({
+            panelHeight: 'auto',
+            valueField: 'ID',
+            textField: 'TEXT',
+            prompt: '---请选择---',
+        });
+
+        $("#table_dg").datagrid({
+            url: "/showAllTable",
+            method: "get",
+            fitColumns: true,
+            rownumbers: true,
+            singleSelect: true,
+            queryParams: {
+                schema: schema[0].ID
+            },
+            columns: [[
+                {
+                    field: 'ck',
+                    title: 'ck',
+                    width: 150,
+                    halign: 'center',
+                    align: 'center',
+                    checkbox: true
+                },
+                {
+                    field: 'Tables',
+                    title: '选择表',
+                    width: 150,
+                    halign: 'center',
+                    align: 'left'
+                }
+            ]],
+            onCheck: function (index, data) {
+                console.info(data);
+                $.ajax({
+                    url: "/getTableColumns",
+                    type: "get",
+                    data: {
+                        table_name: data.Tables,
+                        table_schema: $("#schema_combo").combobox("getValue")
+                    },
+                    success: function (obj) {
+                        chooseKey = obj;
+                        $("#chooseKey").combobox("loadData",obj);
+                    }
+                })
+            }
+        });
+
        $("#way").combobox({
            panelHeight: 'auto',
            valueField: 'ID',
@@ -56,6 +172,7 @@
     });
 
     function addParams() {
+        const num = number;
         const element = "<br><label style=\"width: 120px;\">参数名</label>"
         +"<input class=\"easyui-textbox\" style=\"width: 120px;\" id=\"fileName\">"
         +"<label>参数取值方式</label>"
@@ -64,8 +181,8 @@
            +"textField: 'TEXT',"
            +"prompt: '---请选择---',"
            +"data:[{ID:'1',TEXT:'数字循环'},{ID:'2',TEXT:'字母循环'},{ID:'3',TEXT:'数据库取值'},{ID:'4',TEXT:'固定值'}],"
-           +"onSelect:onSelect\" style=\"width: 120px;\" id=\"way"+number+"\">"
-           +"<div id=\"buttoncontent"+number+"\" style=\"display: inline!important;\"></div>";
+           +"onSelect:onSelect\" style=\"width: 120px;\" id=\"way"+num+"\">"
+           +"<div id=\"buttoncontent"+num+"\" style=\"display: inline!important;\"></div>";
         dom += element;
         number += 1;
         $("#dom").html(dom);
@@ -78,19 +195,19 @@
         let buttoncontent;
         switch (record.ID) {
             case "1":
-                buttoncontent = number_element;
+                buttoncontent = getnumber_element(id);
                 break;
             case "2":
-                buttoncontent = alphabet_element;
+                buttoncontent = getalphabet_element(id);
                 break;
             case "3":
-                buttoncontent = database_element;
+                buttoncontent = getdatabase_element(id);
                 break;
             case "4":
-                buttoncontent = static_element;
+                buttoncontent = getstatic_element(id);
                 break;
             default:
-                buttoncontent = static_element;
+                buttoncontent = getstatic_element(id);
                 break;
         }
         $("#buttoncontent"+id).html(buttoncontent);
@@ -98,7 +215,23 @@
     }
 
     function choose(num) {
-        alert(num);
+        $("#number").val(num);
+        $('#win').window('open');
+    }
+
+    function confirmcolumn() {
+        let schema = $("#schema_combo").combobox("getValue");
+        let table_name = $("#table_dg").datagrid("getSelected").Tables;
+        let column = $("#chooseKey").combobox("getValue");
+        let number = $("#number").val();
+        $("#schema"+number).textbox("setValue",schema);
+        $("#table"+number).textbox("setValue",table_name);
+        $("#database"+number).textbox("setValue",column);
+        closewindow();
+    }
+
+    function closewindow() {
+        $('#win').window('close');
     }
 
     function runcode() {
