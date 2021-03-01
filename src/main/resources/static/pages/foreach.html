@@ -48,6 +48,7 @@
 </div>
 <script type="text/javascript">
     let socket = new WebSocket("ws://localhost:8081/foreach/gerritchang");
+    let tempData = "";
 
     socket.onopen = function(){
         console.info("连接已成功建立");
@@ -62,7 +63,8 @@
     };
 
     socket.onmessage = function(event){
-        $("#content").textbox("setValue",event.data);
+        tempData += event.data+"\n";
+        $("#content").textbox("setValue",tempData);
     };
 
     let number = 0;
@@ -190,6 +192,12 @@
 
     function addParams() {
         const num = number;
+        let data = new Array();
+        if (num == 0){
+            data = "[{ID:'1',TEXT:'数字循环'},{ID:'2',TEXT:'字母循环'},{ID:'4',TEXT:'数据库取值'}]";
+        }else {
+            data = "[{ID:'3',TEXT:'固定值'}]"
+        }
         const element = "<br><label style=\"width: 120px;\">参数名</label>"
         +"<input class=\"easyui-textbox\" style=\"width: 120px;\" id=\"param"+num+"\">"
         +"<label>参数取值方式</label>"
@@ -197,7 +205,7 @@
            +"valueField: 'ID',"
            +"textField: 'TEXT',"
            +"prompt: '---请选择---',"
-           +"data:[{ID:'1',TEXT:'数字循环'},{ID:'2',TEXT:'字母循环'},{ID:'3',TEXT:'数据库取值'},{ID:'4',TEXT:'固定值'}],"
+           +"data:"+data+","
            +"onSelect:onSelect\" style=\"width: 120px;\" id=\"way"+num+"\">"
            +"<div id=\"buttoncontent"+num+"\" style=\"display: inline!important;\"></div>";
         dom += element;
@@ -218,10 +226,10 @@
                 buttoncontent = getalphabet_element(id);
                 break;
             case "3":
-                buttoncontent = getdatabase_element(id);
+                buttoncontent = getstatic_element(id);
                 break;
             case "4":
-                buttoncontent = getstatic_element(id);
+                buttoncontent = getdatabase_element(id);
                 break;
             default:
                 buttoncontent = getstatic_element(id);
@@ -285,6 +293,12 @@
                 break;
             case "3":
                 key = $("#param"+num).textbox("getValue");
+                let staticnumber = $("#staticnumber"+num).textbox("getValue");
+                object.key = key;
+                object.staticnumber = staticnumber;
+                break;
+            case "4":
+                key = $("#param"+num).textbox("getValue");
                 let schema = $("#schema"+num).textbox("getValue");
                 let table = $("#table"+num).textbox("getValue");
                 let database = $("#database"+num).textbox("getValue");
@@ -292,12 +306,6 @@
                 object.schema = schema;
                 object.table = table;
                 object.database = database;
-                break;
-            case "4":
-                key = $("#param"+num).textbox("getValue");
-                let staticnumber = $("#staticnumber"+i).textbox("getValue");
-                object.key = key;
-                object.staticnumber = staticnumber;
                 break;
             default:
                 break;

@@ -4,15 +4,14 @@ import com.google.gson.Gson;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 import top.gerritchang.tools.service.QueryListService;
+import top.gerritchang.tools.service.SelectDbDataService;
 import top.gerritchang.tools.utils.HttpUtils;
 
 import javax.websocket.*;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
@@ -24,6 +23,7 @@ public class ForeachHttpSocket {
     private static final String ERROR = "error";
 
     private static ApplicationContext applicationContext;
+    private SelectDbDataService selectDbDataService;
     public static void setApplicationContext(ApplicationContext applicationContext) {
         ForeachHttpSocket.applicationContext = applicationContext;
     }
@@ -35,7 +35,7 @@ public class ForeachHttpSocket {
     }
 
     @OnClose
-    public void onClose(Session session, @PathParam("username") String username){
+    public void onClose(@PathParam("username") String username){
         webSocketMap.remove(username);
     }
 
@@ -50,17 +50,72 @@ public class ForeachHttpSocket {
         Gson gson = new Gson();
         List<Map> list = gson.fromJson(message, List.class);
         Iterator<Map> iterator = list.iterator();
-        String url;
+        String url="";
+        List<String> dbList = new ArrayList<>();
+        String foreachkey = "";
+        int type = 0;
+        int startnumber = 0;
+        int endnumber = 1;
+        char startalphabet = 'a';
+        char endalphabet = 'z';
+        Map otherParams = new HashMap();
         while (iterator.hasNext()){
             Map map = iterator.next();
-            if (map.get("key").toString().indexOf("http")!= -1){
+            if (map.size() == 1){
                 url = map.get("key").toString();
             }else{
-
+                if (map.containsKey("staticnumber")){
+                    otherParams.put(map.get("key").toString(),map.get("staticnumber").toString());
+                    continue;
+                }
+                if (map.containsKey("schema")){
+                    foreachkey = map.get("key").toString();
+                    selectDbDataService = applicationContext.getBean(SelectDbDataService.class);
+                    dbList = selectDbDataService.queryDataByParams(map.get("schema").toString(),
+                            map.get("table").toString(),map.get("database").toString());
+                    type = 1;
+                }else if (map.containsKey("startnumber")){
+                    foreachkey = map.get("key").toString();
+                    startnumber = Integer.parseInt(map.get("startnumber").toString());
+                    endnumber = Integer.parseInt(map.get("endnumber").toString());
+                    type = 2;
+                }else if (map.containsKey("startalphabet")){
+                    foreachkey = map.get("key").toString();
+                    startalphabet = ((char) map.get("startalphabet"));
+                    endalphabet = ((char) map.get("endalphabet"));
+                    type = 3;
+                }
             }
         }
-        String result = HttpUtils.sendGETCommon("",null);
-        this.sendMessage(this.SUCCESS,"第"+"次请求结果为："+result);
+        this.executeForeach(type,url,dbList,foreachkey,startnumber,endnumber,startalphabet,endalphabet,otherParams);
+    }
+
+    private void executeForeach(int type,String url,List<String> list,String foreachkey,int startnumber,
+            int endnumber, char startalphabet, char endalphabet,Map otherParams){
+        switch (type){
+            case 1:
+                for (int i = 0; i < list.size(); i++) {
+                    otherParams.put(foreachkey,list.get(i));
+                    String result = HttpUtils.sendGETCommon(url,otherParams);
+                    this.sendMessage(this.SUCCESS,"第"+i+"次请求结果为："+result);
+                }
+                break;
+            case 2:
+                for (int i = startnumber; i < endnumber; i++) {
+                    otherParams.put(foreachkey,String.valueOf(i));
+                    String result = HttpUtils.sendGETCommon(url,otherParams);
+                    this.sendMessage(this.SUCCESS,"第"+i+"次请求结果为："+result);
+                }
+                break;
+            case 3:
+                for (char i = startalphabet; i < endalphabet; i++) {
+                    otherParams.put(foreachkey,String.valueOf(i));
+                    String result = HttpUtils.sendGETCommon(url,otherParams);
+                    this.sendMessage(this.SUCCESS,"第"+i+"次请求结果为："+result);
+                }
+                break;
+        }
+
     }
 
     public void sendMessage(String status,String message) {
