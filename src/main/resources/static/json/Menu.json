@@ -97,5 +97,19 @@
     "_parentId": "12",
     "url": "/foreach",
     "state": "open"
+  },
+  {
+    "text": "表单组件",
+    "id": "14",
+    "_parentId": "0",
+    "url": "/formscript",
+    "state": "open"
+  },
+  {
+    "text": "报表工具",
+    "id": "15",
+    "_parentId": "0",
+    "url": "/reportform",
+    "state": "open"
   }
 ]

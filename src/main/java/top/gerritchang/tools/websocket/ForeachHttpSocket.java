@@ -118,7 +118,7 @@ public class ForeachHttpSocket {
 
     }
 
-    public void sendMessage(String status,String message) {
+    private void sendMessage(String status,String message) {
         try {
             if (!webSocketMap.isEmpty()) {
                 ConcurrentHashMap.KeySetView<String, Session> keySetView = webSocketMap.keySet();
