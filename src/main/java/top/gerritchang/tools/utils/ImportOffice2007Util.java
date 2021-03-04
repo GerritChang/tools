@@ -29,8 +29,6 @@ public class ImportOffice2007Util {
             XSSFWorkbook workbook = new XSSFWorkbook(inputStream);
             //获取第一个sheet页
             XSSFSheet sheet = workbook.getSheetAt(0);
-            //获得当前sheet的开始行
-            int firstRowNum = sheet.getFirstRowNum();
             //获得当前sheet的结束行
             int lastRowNum = sheet.getLastRowNum();
             //获取所有的列
