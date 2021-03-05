@@ -15,7 +15,7 @@ import java.util.concurrent.Executor;
  */
 @Configuration
 //扫描当前项目中的异步操作
-@ComponentScan("com.example.demo")
+@ComponentScan("top.gerritchang.tools")
 //允许多线程操作
 @EnableAsync
 public class ExecutorConfiguration  implements AsyncConfigurer {
