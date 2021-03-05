@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Demo</title>
+    <script type="text/javascript" src="./vue/js/vue.js"></script>
+    <script type="text/javascript" src="./vue/js/index.js"></script>
+    <script type="text/javascript" src="./vue/js/spark-md5.js"></script>
+    <link rel="stylesheet" href="./vue/css/index.css"/>
+</head>
+<body>
+<div id="root" style="max-width: 30%;width: 30%;">
+    <el-input
+            type="text"
+            placeholder="请输入内容"
+            v-model="text"
+            maxlength="10"
+            show-word-limit
+    >
+    </el-input>
+    <div style="margin: 20px 0;"></div>
+    <el-input
+            type="textarea"
+            placeholder="请输入内容"
+            v-model="textarea"
+            maxlength="30"
+            show-word-limit
+    >
+    </el-input>
+</div>
+<script type="text/javascript">
+    new Vue({
+        el: '#root',
+        data() {
+            return {
+                text: '',
+                textarea: ''
+            }
+        }
+    })
+</script>
+</body>
+</html>

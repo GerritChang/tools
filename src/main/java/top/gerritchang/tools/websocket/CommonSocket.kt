@@ -2,6 +2,7 @@ package top.gerritchang.tools.websocket
 
 import com.google.gson.Gson
 import org.springframework.context.ApplicationContext
+import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.stereotype.Component
 import top.gerritchang.tools.service.QueryListService
 import java.io.IOException
@@ -13,19 +14,17 @@ import javax.websocket.server.ServerEndpoint
 @Component
 @ServerEndpoint("/commonSocket/{username}")
 class CommonSocket {
-
     private val webSocketMap: ConcurrentHashMap<String, Session> = ConcurrentHashMap()
     private val SUCCESS = "success"
     private val ERROR = "error"
 
     companion object {
-        lateinit var applicationContext: ApplicationContext
+        private lateinit var applicationContext: ApplicationContext
     }
     private var queryListService = QueryListService()
     fun setApplicationContext(applicationContext: ApplicationContext) {
         CommonSocket.applicationContext = applicationContext
     }
-
     @OnOpen
     fun onOpen(session: Session, @PathParam("username") username: String) {
         webSocketMap[username] = session

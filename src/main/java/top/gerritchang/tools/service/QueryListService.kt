@@ -1,19 +1,17 @@
-package top.gerritchang.tools.service;
+package top.gerritchang.tools.service
 
-import top.gerritchang.tools.dao.QueryListDao;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.Map;
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Service
+import top.gerritchang.tools.dao.QueryListDao
 
 @Service
-public class QueryListService {
+class QueryListService {
 
     @Autowired
-    private QueryListDao queryListDao;
+    private var queryListDao = QueryListDao()
 
-    public String getSqlByScriptName(String scriptName) {
-        Map map = queryListDao.getSqlByScriptName(scriptName);
+    fun getSqlByScriptName(scriptName:String):String {
+        val map = queryListDao.getSqlByScriptName(scriptName);
 //        try {
 //            Method method = queryListDao.getClass().getMethod(map.get("script_method").toString(), String.class);
 //            method.invoke(queryListDao, map);

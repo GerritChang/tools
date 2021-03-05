@@ -3,7 +3,6 @@ package top.gerritchang.tools.websocket;
 import com.google.gson.Gson;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
-import top.gerritchang.tools.service.QueryListService;
 import top.gerritchang.tools.service.SelectDbDataService;
 import top.gerritchang.tools.utils.HttpUtils;
 
