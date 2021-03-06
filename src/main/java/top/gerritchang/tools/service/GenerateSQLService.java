@@ -14,27 +14,27 @@ public class GenerateSQLService {
     @Resource
     private SqlSessionTemplate sqlSessionTemplate;
 
-    public List<Map> showAllMySQLTable(){
+    public List<Map<String,String>> showAllMySQLTable(){
         GenerateSQLMapper generateSQLMapper = sqlSessionTemplate.getMapper(GenerateSQLMapper.class);
         return generateSQLMapper.showAllMySQLTable();
     }
 
-    public List<Map> showAllOracleSchemas(){
+    public List<Map<String,String>> showAllOracleSchemas(){
         GenerateSQLMapper generateSQLMapper = sqlSessionTemplate.getMapper(GenerateSQLMapper.class);
         return generateSQLMapper.showAllOracleSchemas();
     }
 
-    public List<Map> showAllOracleTable(String schema){
+    public List<Map<String,String>> showAllOracleTable(String schema){
         GenerateSQLMapper generateSQLMapper = sqlSessionTemplate.getMapper(GenerateSQLMapper.class);
         return generateSQLMapper.showAllOracleTable(schema);
     }
 
-    public List<Map> getMySQLTableColumns(Map map){
+    public List<Map<String,String>> getMySQLTableColumns(Map map){
         GenerateSQLMapper generateSQLMapper = sqlSessionTemplate.getMapper(GenerateSQLMapper.class);
         return generateSQLMapper.getMySQLTableColumns(map);
     }
 
-    public List<Map> getOracleTableColumns(Map map){
+    public List<Map<String,String>> getOracleTableColumns(Map map){
         GenerateSQLMapper generateSQLMapper = sqlSessionTemplate.getMapper(GenerateSQLMapper.class);
         return generateSQLMapper.getOracleTableColumns(map);
     }

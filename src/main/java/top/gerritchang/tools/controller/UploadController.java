@@ -1,7 +1,7 @@
 package top.gerritchang.tools.controller;
 
 import com.alibaba.druid.support.json.JSONUtils;
-import top.gerritchang.tools.mybatis.DataManageService;
+import top.gerritchang.tools.service.DataManageService;
 import top.gerritchang.tools.service.UploadFileService;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;

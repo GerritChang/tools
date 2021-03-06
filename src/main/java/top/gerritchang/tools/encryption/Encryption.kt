@@ -56,30 +56,4 @@ class Encryption {
         return String(encrypt)
     }
 
-    private fun getComputerName():String{
-        return InetAddress.getLocalHost().hostName
-    }
-
-    private fun getOsName():String{
-        return System.getProperty("os.name")
-    }
-
-    private fun getEncryption():String{
-        val macUtils = MacUtils()
-        val hostname:String = getComputerName()
-        val mac:String = macUtils.getSystemMac()
-        val osname:String = getOsName()
-        val osmd5:String = encode(osname)
-        val password:String = osmd5.substring(0,16)
-        val hostAes128:String = encrypt(hostname,password)
-        val macAes128:String = encrypt(mac,password)
-        val finalMD5:String = encode(hostAes128 + macAes128).substring(5,30)
-        return finalMD5
-    }
-
-    fun check(key:String):Boolean{
-        val checkKey = key.replace("-","").toLowerCase()
-        return checkKey.equals(getEncryption())
-    }
-
 }

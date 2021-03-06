@@ -39,7 +39,7 @@ public class WebConfiguration implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new CheckInterceptor())
                 .addPathPatterns("/**")
-                .excludePathPatterns("/activation","/bootstrap/**","/images/**","/json/**","/locale/**",
+                .excludePathPatterns("/activation","/","/index","/queryMenuList","/bootstrap/**","/images/**","/json/**","/locale/**",
                         "/pages/**","/plugins/**","/public/**","/src/**","/style/**","/themes/**","/vue/**"
                         ,"/easyloader.js","/jquery.easyui.min.js","/jquery.min.js");
     }

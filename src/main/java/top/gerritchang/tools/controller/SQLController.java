@@ -26,7 +26,7 @@ public class SQLController {
 
     @GetMapping("/getAllSchemas")
     public Map getAllSchemas() {
-        List<Map> list = new ArrayList<>();
+        List<Map<String,String>> list = new ArrayList<>();
         Map result = new HashMap();
         if (URL.toLowerCase().indexOf("mysql") != -1) {
             Map resultMap = new HashMap();
@@ -70,7 +70,7 @@ public class SQLController {
         Map params = new HashMap();
         params.put("table_name", table_name);
         params.put("table_schema", table_schema);
-        List<Map> list = null;
+        List<Map<String,String>> list = null;
         if (URL.toLowerCase().indexOf("mysql") != -1) {
             list = generateSQLService.getMySQLTableColumns(params);
         } else {
@@ -97,7 +97,7 @@ public class SQLController {
         Map params = new HashMap();
         params.put("table_name", table_name);
         params.put("table_schema", table_schema);
-        List<Map> list = generateSQLService.getMySQLTableColumns(params);
+        List<Map<String,String>> list = generateSQLService.getMySQLTableColumns(params);
         StringBuffer stringBuffer = new StringBuffer();
         StringBuffer keyBuffer = new StringBuffer();
         StringBuffer columnBuffer = new StringBuffer();
@@ -153,7 +153,7 @@ public class SQLController {
         Map params = new HashMap();
         params.put("table_name", table_name);
         params.put("table_schema", table_schema);
-        List<Map> list = generateSQLService.getOracleTableColumns(params);
+        List<Map<String,String>> list = generateSQLService.getOracleTableColumns(params);
         StringBuffer stringBuffer = new StringBuffer();
         StringBuffer keyBuffer = new StringBuffer();
         StringBuffer columnBuffer = new StringBuffer();
@@ -271,9 +271,9 @@ public class SQLController {
      * @return
      */
     private Map showAllMySQLTable(String database) {
-        List<Map> list = generateSQLService.showAllMySQLTable();
+        List<Map<String,String>> list = generateSQLService.showAllMySQLTable();
         List<Map> data = new ArrayList<>();
-        Iterator<Map> iterator = list.iterator();
+        Iterator<Map<String,String>> iterator = list.iterator();
         while (iterator.hasNext()) {
             Map m = iterator.next();
             Map map = new HashMap();
@@ -293,9 +293,9 @@ public class SQLController {
      * @return
      */
     private Map showAllOracleTable(String schema) {
-        List<Map> list = generateSQLService.showAllOracleTable(schema);
+        List<Map<String,String>> list = generateSQLService.showAllOracleTable(schema);
         Map resultMap = new HashMap();
-        Iterator<Map> iterator = list.iterator();
+        Iterator<Map<String,String>> iterator = list.iterator();
         List<Map> data = new ArrayList<>();
         while (iterator.hasNext()) {
             Map m = iterator.next();
@@ -348,7 +348,7 @@ public class SQLController {
         Map params = new HashMap();
         params.put("table_name", table_name);
         params.put("table_schema", this.getDataBaseName());
-        List<Map> list = generateSQLService.getMySQLTableColumns(params);
+        List<Map<String,String>> list = generateSQLService.getMySQLTableColumns(params);
         StringBuffer stringBuffer = new StringBuffer();
         for (Map map : list) {
             stringBuffer.append(map.get("COLUMN_NAME")).append(",");
