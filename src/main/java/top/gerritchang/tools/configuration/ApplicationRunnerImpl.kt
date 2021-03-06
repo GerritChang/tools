@@ -12,7 +12,7 @@ import top.gerritchang.tools.DemoApplication
 import top.gerritchang.tools.utils.HttpUtils
 
 @Component
-class ApplicationRunnerImpl:ApplicationRunner {
+open class ApplicationRunnerImpl:ApplicationRunner {
 
     @Value("\${server.port}")
     private val port: String? = null

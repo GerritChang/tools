@@ -2,7 +2,7 @@ package top.gerritchang.tools.utils
 
 import java.util.concurrent.ConcurrentHashMap
 
-class KeyUtils {
+open class KeyUtils {
 
     companion object{
         var key: ConcurrentHashMap<String, String> = ConcurrentHashMap()

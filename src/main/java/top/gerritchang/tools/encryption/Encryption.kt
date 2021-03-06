@@ -1,8 +1,6 @@
 package top.gerritchang.tools.encryption
 
 import com.sun.org.apache.xml.internal.security.utils.Base64
-import top.gerritchang.tools.utils.MacUtils
-import java.net.InetAddress
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 import javax.crypto.Cipher

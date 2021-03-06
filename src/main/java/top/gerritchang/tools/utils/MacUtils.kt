@@ -3,7 +3,7 @@ package top.gerritchang.tools.utils
 import java.net.InetAddress
 import java.net.NetworkInterface
 
-class MacUtils {
+open class MacUtils {
     fun getSystemMac(): String {
         return try {
             val OSName = System.getProperty("os.name")     //Get Operating System Name

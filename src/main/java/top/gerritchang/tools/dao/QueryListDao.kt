@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component
 class QueryListDao {
 
     @Autowired
-    private var jdbcTemplate:JdbcTemplate = JdbcTemplate()
+    private lateinit var jdbcTemplate:JdbcTemplate
 
     fun getSqlByScriptName(scriptName: String): Map<String, *> {
         return jdbcTemplate.queryForMap("select script_sql,script_method from form_script where script_name = '"

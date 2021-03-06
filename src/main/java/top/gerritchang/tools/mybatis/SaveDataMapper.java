@@ -1,13 +1,16 @@
-package top.gerritchang.tools.mybatis
+package top.gerritchang.tools.mybatis;
 
-import org.apache.ibatis.annotations.Delete
-import org.apache.ibatis.annotations.Insert
-import org.apache.ibatis.annotations.Mapper
-import org.apache.ibatis.annotations.Select
-import top.gerritchang.tools.entity.UploadEntity
+import top.gerritchang.tools.entity.UploadEntity;
+import org.apache.ibatis.annotations.Delete;
+import org.apache.ibatis.annotations.Insert;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Select;
+
+import java.util.List;
 
 @Mapper
-interface SaveDataMapper {
+public interface SaveDataMapper {
+
     /**
      * 把上传后的结果写入到数据库中
      * @param entity
@@ -16,7 +19,7 @@ interface SaveDataMapper {
     @Insert("insert into UploadFileInfo(fileId,fileName,fileSize,fileType,fileContent,businessId,creater,uploadTime," +
             "mongodbId,mongodbType,md5Value) values(#{fileId},#{fileName},#{fileSize},#{fileType},null,#{businessId}," +
             "#{creater},to_date(#{uploadTime},'yyyy-MM-dd HH24:mi:ss'),#{mongodbId},#{mongodbType},#{md5Value})")
-    fun insertIntoDataBase(entity: UploadEntity?): Int
+    int insertIntoDataBase(UploadEntity entity);
 
     /**
      * 根据业务主键和用户名查询文件列表
@@ -25,7 +28,7 @@ interface SaveDataMapper {
      * @return
      */
     @Select("select * from UploadFileInfo where businssId=#{businssId} and creater=#{creater}")
-    fun queryFileList(businessId: String?, creater: String?): List<UploadEntity?>?
+    List<UploadEntity> queryFileList(String businessId, String creater);
 
     /**
      * 根据文件id删除文件
@@ -33,7 +36,7 @@ interface SaveDataMapper {
      * @return
      */
     @Delete("delete from UploadFileInfo where fileId=#{fileId}")
-    fun deleteFileByFileId(fileId: String?): Int
+    int deleteFileByFileId(String fileId);
 
     /**
      * 根据文件id查询文件信息
@@ -41,5 +44,5 @@ interface SaveDataMapper {
      * @return
      */
     @Select("select * from UploadFileInfo where fileId=#{fileId}")
-    fun queryMongoIdAndTypeByFileId(fileId: String?): UploadEntity?
+    UploadEntity queryMongoIdAndTypeByFileId(String fileId);
 }

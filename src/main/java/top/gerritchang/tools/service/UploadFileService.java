@@ -4,13 +4,13 @@ import com.alibaba.druid.support.json.JSONUtils;
 import top.gerritchang.tools.utils.HttpUtils;
 import top.gerritchang.tools.utils.StaticVarUtils;
 import top.gerritchang.tools.websocket.UploadWebSocket;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.annotation.Resource;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
@@ -19,13 +19,13 @@ import java.util.UUID;
 @Service
 public class UploadFileService {
 
-    @Autowired
+    @Resource
     private RedisTemplate redisTemplate;
 
-    @Autowired
+    @Resource
     private UploadWebSocket webSocket;
 
-    @Autowired
+    @Resource
     private DataManageService dataManageService;
 
     @Value("${mongodb.url}")

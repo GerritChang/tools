@@ -10,7 +10,7 @@ import java.lang.Exception
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
-class CheckInterceptor: HandlerInterceptorAdapter() {
+open class CheckInterceptor: HandlerInterceptorAdapter() {
 
     override fun preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean {
         if (KeyUtils.key.size <= 0) {

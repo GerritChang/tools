@@ -8,7 +8,7 @@ import top.gerritchang.tools.dao.QueryListDao
 class QueryListService {
 
     @Autowired
-    private var queryListDao = QueryListDao()
+    private lateinit var queryListDao : QueryListDao
 
     fun getSqlByScriptName(scriptName:String):String {
         val map = queryListDao.getSqlByScriptName(scriptName);

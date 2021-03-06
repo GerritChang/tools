@@ -66,19 +66,21 @@
     let text3 = false;
     let text4 = false;
     let text5 = false;
+    let _this;
 
     new Vue({
         el: '#root',
         data() {
             return {
-                number:0,
-                text:'',
                 text1: '',
                 text2: '',
                 text3: '',
                 text4: '',
                 text5: ''
             }
+        },
+        mounted(){
+            _this = this;
         },
         methods:{
             onSubmit(){
@@ -95,10 +97,27 @@
                     },
                     async:false,
                     success:function (data) {
-                        this.$notify({
-                            title: '成功',
-                            message: '恭喜你，激活成功',
-                            type: 'success',
+                        if (data.status === "success"){
+                            _this.$notify({
+                                title: '成功',
+                                message: '恭喜你，激活成功',
+                                type: 'success',
+                                duration: 0
+                            });
+                            loading.close();
+                        }else{
+                            _this.$notify.error({
+                                title: '错误',
+                                message: '激活失败',
+                                duration: 0
+                            });
+                            loading.close();
+                        }
+                    },
+                    error:function (data) {
+                        _this.$notify.error({
+                            title: '错误',
+                            message: '激活失败',
                             duration: 0
                         });
                         loading.close();
