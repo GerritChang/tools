@@ -3,9 +3,11 @@ package top.gerritchang.tools
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.context.ConfigurableApplicationContext
-import top.gerritchang.tools.websocket.CommonSocket
+import org.springframework.context.annotation.ComponentScan
+import top.gerritchang.check.websocket.CommonSocket
 
 @SpringBootApplication
+@ComponentScan("top.gerritchang.check","top.gerritchang.tools")
 open class DemoApplication
 
 fun main(args: Array<String>) {
