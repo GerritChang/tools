@@ -4,7 +4,7 @@ import com.google.gson.Gson
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RestController
 import top.gerritchang.tools.utils.HttpUtils
-import top.gerritchang.tools.utils.MacUtils
+import top.gerritchang.check.utils.MacUtils
 import java.net.InetAddress
 
 @RestController

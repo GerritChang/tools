@@ -111,5 +111,12 @@
     "_parentId": "0",
     "url": "/reportform",
     "state": "open"
+  },
+  {
+    "text": "二维码生成",
+    "id": "16",
+    "_parentId": "0",
+    "url": "/qrImage",
+    "state": "open"
   }
 ]
