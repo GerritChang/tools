@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<top>
+    <gerritchang>
+        <itext>
+            <configuration>
+                <pageTotals>1</pageTotals>
+                <!-- horizontal || vertical -->
+                <paperDirection>horizontal</paperDirection>
+                <paperStyle marginTop="" marginBottom="" marginLeft="" marginRight=""></paperStyle>
+            </configuration>
+            <content>
+                <config>
+                    <table id="" rows="5" columns="24" percentage="100">
+                        <!-- border color only support black -->
+                        <tr border="1" borderColor="black">
+                            <td textAlign="right" fontSize="12" rows="1" columns="5">${BT1}</td>
+                            <td textAlign="left" fontSize="12" rows="1" columns="5">${NR1}</td>
+                            <td textAlign="right" fontSize="12" rows="1" columns="5">${BT2}</td>
+                            <td textAlign="left" fontSize="12" rows="1" columns="5">${NR2}</td>
+                            <td textAlign="right" fontSize="12" rows="1" columns="5">${NR3}</td>
+                        </tr>
+                        <tr border="1" borderColor="black">
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <!-- foreach value only support list:List<Map> -->
+                        <tr border="1" borderColor="black" foreach="true">
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr border="0">
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                    </table>
+                </config>
+            </content>
+        </itext>
+    </gerritchang>
+</top>
