@@ -1,7 +1,7 @@
 package top.gerritchang.tools.importOffice.controller;
 
-import top.gerritchang.tools.importOffice.utils.ImportOffice2003Util;
-import top.gerritchang.tools.importOffice.utils.ImportOffice2007Util;
+import top.gerritchang.tools.importOffice.utils.ImportExcel2003Util;
+import top.gerritchang.tools.importOffice.utils.ImportExcel2007Util;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,10 +23,10 @@ public class ImportController {
         String suffix = fileName.substring(fileName.lastIndexOf(".") + 1);
         if ("xls".equals(suffix.toLowerCase())) {
             //2003版的Excel调用2003版的导入方法
-            result = ImportOffice2003Util.getSheetColumns(file);
+            result = ImportExcel2003Util.getSheetColumns(file);
         } else if ("xlsx".equals(suffix.toLowerCase())) {
             //2007版的Excel调用2007版的导入方法
-            result = ImportOffice2007Util.getSheetColumns(file);
+            result = ImportExcel2007Util.getSheetColumns(file);
         }
         List<Map> list = new ArrayList<>();
         for (int i = 0; i < result.size(); i++) {

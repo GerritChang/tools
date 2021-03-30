@@ -1,6 +1,6 @@
 package top.gerritchang.tools.importOffice.exception;
 
-public class ColumnIsNullException extends Exception {
+public class ColumnIsNullException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
 

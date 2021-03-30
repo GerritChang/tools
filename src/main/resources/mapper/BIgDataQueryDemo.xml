@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="top.gerritchang.tools.exportExcel.mybatis.StreamQueryMapper">
+
+    <select id="streamQuery" resultType="java.util.Map" resultSetType="FORWARD_ONLY" fetchSize="-2147483648">
+        select A.COLUMN_NAME
+        from ALL_COL_COMMENTS A where A.OWNER = #{table_schema} and A.table_name=#{table_name}
+    </select>
+
+</mapper>

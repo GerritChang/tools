@@ -5,11 +5,11 @@ import top.gerritchang.tools.importOffice.exception.ColumnIsNullException;
 import top.gerritchang.tools.importOffice.exception.MissingColumnsException;
 import top.gerritchang.tools.importOffice.exception.ValueContainsSpecialCharException;
 import org.apache.commons.lang.StringUtils;
-import org.apache.poi.hssf.usermodel.HSSFCell;
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.DateUtil;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -17,7 +17,7 @@ import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-public class ImportOffice2003Util {
+public class ImportExcel2007Util {
 
     public static List<Map> importExcel(MultipartFile file, List<ImportEntity> list, List notNullColumns
             , String status) throws MissingColumnsException, ValueContainsSpecialCharException, ColumnIsNullException {
@@ -26,13 +26,13 @@ public class ImportOffice2003Util {
             //将上传的文件转化成字节流读取
             InputStream inputStream = file.getInputStream();
             //使用HSSFWorkBook读取Excel文件
-            HSSFWorkbook workbook = new HSSFWorkbook(inputStream);
+            XSSFWorkbook workbook = new XSSFWorkbook(inputStream);
             //获取第一个sheet页
-            HSSFSheet sheet = workbook.getSheetAt(0);
+            XSSFSheet sheet = workbook.getSheetAt(0);
             //获得当前sheet的结束行
             int lastRowNum = sheet.getLastRowNum();
             //获取所有的列
-            HSSFRow hssfRow = sheet.getRow(0);
+            XSSFRow hssfRow = sheet.getRow(0);
             int colNumber = hssfRow.getPhysicalNumberOfCells();
             //将需要存的字段所在的列号记录到一个int数组里
             List<ImportEntity> listmap = new ArrayList();
@@ -40,8 +40,8 @@ public class ImportOffice2003Util {
             //记录表头所在的行号
             int titleRowNumber = 0;
             for (int j = 0; j < colNumber; j++) {
-                HSSFRow row = sheet.getRow(0);
-                HSSFCell cell = row.getCell(j);
+                XSSFRow row = sheet.getRow(0);
+                XSSFCell cell = row.getCell(j);
                 String columnName = cell.getStringCellValue();
                 ImportEntity entity = recordSheetColumnNumber(list, columnName, j);
                 if (entity != null) {
@@ -58,7 +58,7 @@ public class ImportOffice2003Util {
             //开始获取结果集
             int dataRowNumber = Math.addExact(titleRowNumber, 1);
             for (int i = dataRowNumber; i <= lastRowNum; i++) {
-                HSSFRow row = sheet.getRow(i);
+                XSSFRow row = sheet.getRow(i);
                 Map m = transColumnsToDbColumns(row, listmap);
                 StringBuffer stringBuffer = new StringBuffer();
                 m.forEach((key, value) -> {
@@ -78,18 +78,17 @@ public class ImportOffice2003Util {
     public static List<String> getSheetColumns(MultipartFile file){
         List<String> result = new ArrayList<>();
         try {
-            //将上传的文件转化成字节流读取
             InputStream inputStream = file.getInputStream();
             //使用HSSFWorkBook读取Excel文件
-            HSSFWorkbook workbook = new HSSFWorkbook(inputStream);
+            XSSFWorkbook workbook = new XSSFWorkbook(inputStream);
             //获取第一个sheet页
-            HSSFSheet sheet = workbook.getSheetAt(0);
+            XSSFSheet sheet = workbook.getSheetAt(0);
             //获取所有的列
-            HSSFRow hssfRow = sheet.getRow(0);
+            XSSFRow hssfRow = sheet.getRow(0);
             int colNumber = hssfRow.getPhysicalNumberOfCells();
             for (int j = 0; j < colNumber; j++) {
-                HSSFRow row = sheet.getRow(0);
-                HSSFCell cell = row.getCell(j);
+                XSSFRow row = sheet.getRow(0);
+                XSSFCell cell = row.getCell(j);
                 String columnName = cell.getStringCellValue();
                 result.add(columnName);
             }
@@ -164,17 +163,17 @@ public class ImportOffice2003Util {
      * @return
      * @throws ValueContainsSpecialCharException
      */
-    private static Map transColumnsToDbColumns(HSSFRow row, List<ImportEntity> list)
+    private static Map transColumnsToDbColumns(XSSFRow row, List<ImportEntity> list)
             throws ValueContainsSpecialCharException {
         Map map = new HashMap();
         for (int j = 0; j < list.size(); j++) {
             int columnNumber = list.get(j).getColumnNumber();
             String DBColumnName = list.get(j).getDbColumnName();
-            HSSFCell cell = row.getCell(columnNumber);
+            XSSFCell cell = row.getCell(columnNumber);
             String cellValue = "";
             if (!"".equals(cell) && cell != null) {
                 switch (cell.getCellType()) {
-                    case HSSFCell.CELL_TYPE_NUMERIC: // 数字
+                    case XSSFCell.CELL_TYPE_NUMERIC: // 数字
                         if (DateUtil.isCellDateFormatted(cell)) {
                             Date date = cell.getDateCellValue();
                             SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
@@ -184,23 +183,23 @@ public class ImportOffice2003Util {
                         }
                         break;
 
-                    case HSSFCell.CELL_TYPE_STRING: // 字符串
+                    case XSSFCell.CELL_TYPE_STRING: // 字符串
                         cellValue = cell.getStringCellValue();
                         break;
 
-                    case HSSFCell.CELL_TYPE_BOOLEAN: // Boolean
+                    case XSSFCell.CELL_TYPE_BOOLEAN: // Boolean
                         cellValue = cell.getBooleanCellValue() + "";
                         break;
 
-                    case HSSFCell.CELL_TYPE_FORMULA: // 公式
+                    case XSSFCell.CELL_TYPE_FORMULA: // 公式
                         cellValue = cell.getCellFormula() + "";
                         break;
 
-                    case HSSFCell.CELL_TYPE_BLANK: // 空值
+                    case XSSFCell.CELL_TYPE_BLANK: // 空值
                         cellValue = "";
                         break;
 
-                    case HSSFCell.CELL_TYPE_ERROR: // 故障
+                    case XSSFCell.CELL_TYPE_ERROR: // 故障
                         throw new ValueContainsSpecialCharException("内容中包含非法字符，不被支持");
                     default:
                         throw new ValueContainsSpecialCharException("内容中类型未知，不被支持");

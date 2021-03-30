@@ -1,6 +1,6 @@
 package top.gerritchang.tools.importOffice.exception;
 
-public class ValueContainsSpecialCharException extends Exception {
+public class ValueContainsSpecialCharException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
 
