@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title>附件上传</title>
+    <script type="text/javascript" src="./vue/js/vue.js"></script>
+    <script type="text/javascript" src="./vue/js/iview.js"></script>
+    <link rel="stylesheet" type="text/css" href="./vue/css/iview.css"/>
+    <script src="public/lodash.js" type="text/javascript"></script>
+</head>
+<body>
+<div id="root">
+    <div>
+        <i-form :label-width="100">
+            <form-item label="已选择：">
+                <Tag size="large"
+                     closable
+                     v-for="item in TagName"
+                     :key="item.ID"
+                     :name="item.TEXT"
+                     @on-close="handlerTagClose(item)">
+                    {{item.TEXT}}
+                </Tag>
+            </form-item>
+            <div v-for="(item,index) in formArray" :key="index">
+                <form-item :label="item.labelName+'：'">
+                    <i-button v-for="(child,childIndex) in item.list"
+                              :key="childIndex"
+                              @click="chooseItem(child,item.labelId)"
+                              type="text"
+                              :disabled="child.notShow">
+                        {{child.TEXT}}
+                    </i-button>
+                </form-item>
+            </div>
+        </i-form>
+        <Tag type="border">子组件：TaoBaoSearch</Tag>
+        <i-input v-model="value1" type="textarea" :rows="6"></i-input>
+        <br/>
+        <i-input v-model="value2" type="textarea" :rows="6"></i-input>
+        <br/>
+        <i-input v-model="value3" type="textarea" :rows="6"></i-input>
+        <br/>
+        <Tag type="border">父组件：</Tag>
+        <i-input v-model="value4" type="textarea" :rows="6"></i-input>
+        <br/>
+        <i-input v-model="value5" type="textarea" :rows="6"></i-input>
+    </div>
+</div>
+<script>
+
+    new Vue({
+        el: '#root',
+        data() {
+            return {
+                TagName: [],
+                queryParams: {},
+                autoQuery: true,
+                formArray: [
+                    {
+                        labelName: '上市年份',
+                        labelId: 'year',
+                        list: [
+                            {ID: '2021', TEXT: '2021', notShow: false},
+                            {ID: '2020', TEXT: '2020', notShow: false},
+                            {ID: '2019', TEXT: '2019', notShow: false},
+                            {ID: '2018', TEXT: '2018', notShow: false},
+                            {ID: '2017', TEXT: '2017', notShow: false},
+                            {ID: '2016', TEXT: '2016', notShow: false}
+                        ]
+                    },
+                    {
+                        labelName: '品牌',
+                        labelId: 'brand',
+                        list: [
+                            {ID: '01', TEXT: 'Apple', notShow: false},
+                            {ID: '02', TEXT: '华为', notShow: false},
+                            {ID: '03', TEXT: '小米', notShow: false},
+                            {ID: '04', TEXT: 'vivo', notShow: false},
+                            {ID: '05', TEXT: 'OPPO', notShow: false}
+                        ]
+                    },
+                    {
+                        labelName: 'CPU',
+                        labelId: 'cpu',
+                        list: [
+                            {ID: '01', TEXT: '苹果A14', notShow: false},
+                            {ID: '02', TEXT: '苹果A13', notShow: false},
+                            {ID: '03', TEXT: '骁龙888', notShow: false},
+                            {ID: '04', TEXT: '骁龙870', notShow: false},
+                            {ID: '05', TEXT: '骁龙865', notShow: false}
+                        ]
+                    },
+                    {
+                        labelName: '存储',
+                        labelId: 'storage',
+                        list: [
+                            {ID: '01', TEXT: '6G+128G', notShow: false},
+                            {ID: '02', TEXT: '8G+128G', notShow: false},
+                            {ID: '03', TEXT: '6G+256G', notShow: false},
+                            {ID: '04', TEXT: '8G+256G', notShow: false},
+                            {ID: '05', TEXT: '12G+512G', notShow: false}
+                        ]
+                    }
+                ],
+                value1: `
+                <template>
+                  <div>
+                    <Form :label-width="100">
+                      <Divider/>
+                      <FormItem label="已选择：">
+                        <Tag size="large"
+                             closable
+                             v-for="item in TagName"
+                             :key="item.ID"
+                             :name="item.TEXT"
+                             @on-close="handlerTagClose(item)">
+                          {{item.TEXT}}
+                        </Tag>
+                      </FormItem>
+                      <Divider/>
+                      <div v-for="(item,index) in formItem" :key="index">
+                        <FormItem :label="item.labelName+'：'">
+                          <Button v-for="(child,childIndex) in item.list"
+                                  :key="childIndex"
+                                  @click="chooseItem(child,item.labelId)"
+                                  type="text"
+                                  :disabled="child.notShow">
+                            {{child.TEXT}}
+                          </Button>
+                        </FormItem>
+                        <Divider/>
+                      </div>
+                    </Form>
+                  </div>
+                </template>
+                `,
+                value2: `
+                    export default {
+                    name: "TaoBaoSearch",
+                    props: ['formItem','autoQuery'],
+                    data() {
+                        return {
+                            TagName: [],
+                            queryParams: {},
+                        }
+                    },
+                    mounted() {
+                        for (let i = 0; i < this.formItem.length; i++) {
+                            this.queryParams[this.formItem[i].labelId] = new Array();
+                        }
+                    },
+                    methods: {
+                        chooseItem(obj, labelId) {
+                            obj.labelId = labelId;
+                            this.TagName.push(obj);
+                            this.queryParams[labelId].push(obj.ID);
+                            obj.notShow = true;
+                            if (this.autoQuery) {
+                                this.$parent.queryData(this.queryParams);
+                            }
+                        },
+                        handlerTagClose(obj) {
+                            const labelId = obj.labelId;
+                            this._.pull(this.queryParams[labelId], obj.ID);
+                            const index = this._.indexOf(this.TagName, obj);
+                            obj.notShow = false;
+                            this.TagName.splice(index, 1);
+                            if (this.autoQuery) {
+                                this.$parent.queryData(this.queryParams);
+                            }
+                        }
+                    }
+                }
+                `,
+                value3: `
+                  .ivu-divider-horizontal {
+                    margin: 0;
+                  }
+
+                  .ivu-form-item {
+                    margin-bottom: 0;
+                  }
+                `,
+                value4: `
+                import TaoBaoSearch from "../components/TaoBaoSearch";
+
+                export default {
+                    name: "Index",
+                    components:{
+                        TaoBaoSearch
+                    },
+                    data(){
+                        return{
+                            autoQuery: true,
+                            formItem: [
+                                {
+                                    labelName: '上市年份',
+                                    labelId: 'year',
+                                    list: [
+                                        {ID: '2021', TEXT: '2021', notShow: false},
+                                        {ID: '2020', TEXT: '2020', notShow: false},
+                                        {ID: '2019', TEXT: '2019', notShow: false},
+                                        {ID: '2018', TEXT: '2018', notShow: false},
+                                        {ID: '2017', TEXT: '2017', notShow: false},
+                                        {ID: '2016', TEXT: '2016', notShow: false}
+                                    ]
+                                },
+                                {
+                                    labelName: '品牌',
+                                    labelId: 'brand',
+                                    list: [
+                                        {ID: '01', TEXT: 'Apple', notShow: false},
+                                        {ID: '02', TEXT: '华为', notShow: false},
+                                        {ID: '03', TEXT: '小米', notShow: false},
+                                        {ID: '04', TEXT: 'vivo', notShow: false},
+                                        {ID: '05', TEXT: 'OPPO', notShow: false}
+                                    ]
+                                },
+                                {
+                                    labelName: 'CPU',
+                                    labelId: 'cpu',
+                                    list: [
+                                        {ID: '01', TEXT: '苹果A14', notShow: false},
+                                        {ID: '02', TEXT: '苹果A13', notShow: false},
+                                        {ID: '03', TEXT: '骁龙888', notShow: false},
+                                        {ID: '04', TEXT: '骁龙870', notShow: false},
+                                        {ID: '05', TEXT: '骁龙865', notShow: false}
+                                    ]
+                                },
+                                {
+                                    labelName: '存储',
+                                    labelId: 'storage',
+                                    list: [
+                                        {ID: '01', TEXT: '6G+128G', notShow: false},
+                                        {ID: '02', TEXT: '8G+128G', notShow: false},
+                                        {ID: '03', TEXT: '6G+256G', notShow: false},
+                                        {ID: '04', TEXT: '8G+256G', notShow: false},
+                                        {ID: '05', TEXT: '12G+512G', notShow: false}
+                                    ]
+                                }
+                            ]
+                        }
+                    },
+                    methods:{
+                        queryData(obj){
+                            console.info(obj);
+                        }
+                    }
+                }
+                `,
+                value5: `<TaoBaoSearch :auto-query="autoQuery" :form-item="formItem" @queryData="queryData"/>`
+            }
+        },
+        mounted() {
+            for (let i = 0; i < this.formArray.length; i++) {
+                this.queryParams[this.formArray[i].labelId] = new Array();
+            }
+        },
+        methods: {
+            chooseItem(obj, labelId) {
+                obj.labelId = labelId;
+                this.TagName.push(obj);
+                this.queryParams[labelId].push(obj.ID);
+                obj.notShow = true;
+                if (this.autoQuery) {
+                    //this.$parent.queryData(this.queryParams);
+                }
+            },
+            handlerTagClose(obj) {
+                const labelId = obj.labelId;
+                _.pull(this.queryParams[labelId], obj.ID);
+                const index = _.indexOf(this.TagName, obj);
+                obj.notShow = false;
+                this.TagName.splice(index, 1);
+                if (this.autoQuery) {
+                    //this.$parent.queryData(this.queryParams);
+                }
+            }
+        }
+    })
+</script>
+
+<style>
+    .ivu-divider-horizontal {
+        margin: 0;
+    }
+
+    .ivu-form-item {
+        margin-bottom: 0 !important;
+    }
+</style>
+</body>
+</html>

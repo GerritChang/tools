@@ -118,5 +118,19 @@
     "_parentId": "0",
     "url": "/qrImage",
     "state": "open"
+  },
+  {
+    "text": "Vue组件示例",
+    "id": "17",
+    "_parentId": "0",
+    "url": "",
+    "state": "closed"
+  },
+  {
+    "text": "淘宝式查询",
+    "id": "18",
+    "_parentId": "17",
+    "url": "/taobao",
+    "state": "open"
   }
 ]
