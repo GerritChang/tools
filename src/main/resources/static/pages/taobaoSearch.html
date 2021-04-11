@@ -131,6 +131,13 @@
                         </FormItem>
                         <Divider/>
                       </div>
+                      <div v-if="showInputAndButton">
+                        <FormItem label="搜索：">
+                          <Input v-model="query" :placeholder="placeholder"/>
+                          <Button type="primary" @click="searchData">搜索</Button>
+                        </FormItem>
+                        <Divider/>
+                      </div>
                     </Form>
                   </div>
                 </template>
@@ -138,11 +145,12 @@
                 value2: `
                     export default {
                     name: "TaoBaoSearch",
-                    props: ['formItem','autoQuery'],
+                    props: ['formItem','autoQuery', 'showInputAndButton', 'placeholder'],
                     data() {
                         return {
                             TagName: [],
                             queryParams: {},
+                            query: ''
                         }
                     },
                     mounted() {
@@ -169,6 +177,11 @@
                             if (this.autoQuery) {
                                 this.$parent.queryData(this.queryParams);
                             }
+                        },
+                        searchData(){
+                            this.queryParams.query = this.query;
+                            console.info(this.queryParams);
+                            this.$parent.queryData(this.queryParams);
                         }
                     }
                 }
@@ -180,6 +193,10 @@
 
                   .ivu-form-item {
                     margin-bottom: 0;
+                  }
+
+                  .ivu-input-wrapper{
+                    width: 400px !important;
                   }
                 `,
                 value4: `
@@ -193,6 +210,7 @@
                     data(){
                         return{
                             autoQuery: true,
+                            placeholder:'请输入内容',
                             formItem: [
                                 {
                                     labelName: '上市年份',
@@ -249,7 +267,12 @@
                     }
                 }
                 `,
-                value5: `<TaoBaoSearch :auto-query="autoQuery" :form-item="formItem" @queryData="queryData"/>`
+                value5: `<TaoBaoSearch
+                    :auto-query="autoQuery"
+                    :form-item="formItem"
+                    :show-input-and-button="true"
+                    :placeholder="placeholder"
+                    @queryData="queryData"/>`
             }
         },
         mounted() {

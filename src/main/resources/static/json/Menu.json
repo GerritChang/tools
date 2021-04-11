@@ -78,6 +78,13 @@
     "state": "open"
   },
   {
+    "text": "Excel导出",
+    "id": "11",
+    "_parentId": "8",
+    "url": "/exportExcel",
+    "state": "open"
+  },
+  {
     "text": "接口操作",
     "id": "12",
     "_parentId": "0",
